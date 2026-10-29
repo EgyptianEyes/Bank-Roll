@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Try Bank-Roll Intelligence with temporary, manually entered or generated roulette outcomes. Test data is not real-table research and expires within 24 hours." />
+  <title>Test Mode | Bank-Roll</title>
+  <link rel="stylesheet" href="assets/css/bank-roll.css" />
+</head>
+<body class="test-mode-document">
+  <div class="test-mode-shell">
+    <header class="research-public-header">
+      <a class="research-brand" href="index.html">
+        <strong>Bank-Roll</strong>
+        <span>WINNING STREETS · TEST LAB</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Laboratory</a>
+        <a href="/faq">FAQ</a>
+        <a href="/docs">Technical docs</a>
+        <a href="research.html">Research &amp; method</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="test-mode-banner" aria-labelledby="testModeTitle">
+        <div>
+          <span class="test-mode-badge"><span aria-hidden="true"></span> TEST MODE</span>
+          <h1 id="testModeTitle">Try BRI with your own sequence.</h1>
+          <p>Enter any European result, make a streak, or generate a short random run. BRI uses its real forecasting, scoring and decision engines in this disposable sandbox.</p>
+        </div>
+        <div class="test-expiry" role="timer" aria-live="polite">
+          <span>Temporary results · Not real-table research</span>
+          <strong id="testExpiry">Start a test to see expiry</strong>
+          <small>Expires 24 hours after creation. Activity does not extend the deadline.</small>
+        </div>
+      </section>
+
+      <section class="test-setup" id="testSetup" aria-labelledby="testSetupTitle">
+        <div>
+          <h2 id="testSetupTitle">Start a temporary session</h2>
+          <p>Everything stays in this page's memory. Nothing is sent to the server or saved to table research.</p>
+        </div>
+        <label for="testWageringMode">Decision mode</label>
+        <select id="testWageringMode">
+          <option value="evidence-gated">Evidence-Gated</option>
+          <option value="strategy-research">Strategy Research · simulated only</option>
+        </select>
+        <label for="testCompanionMode">BRI companion</label>
+        <select id="testCompanionMode">
+          <option value="quiet">Quiet</option>
+          <option value="companion" selected>Companion</option>
+          <option value="full">Full character</option>
+        </select>
+        <button class="btn primary" id="btnStartTest" type="button">Start Test Mode</button>
+      </section>
+
+      <section class="test-session" id="testSession" hidden>
+        <div class="test-session-heading">
+          <div>
+            <span class="test-mode-badge"><span aria-hidden="true"></span> TEST MODE · TEMPORARY</span>
+            <p id="testSessionState" role="status" aria-live="polite">Session ready</p>
+          </div>
+          <button class="btn test-discard-button" id="btnDiscardTest" type="button">End Test &amp; Discard Results</button>
+        </div>
+
+        <div class="test-grid">
+          <section class="test-input-panel" aria-labelledby="testEntryTitle">
+            <div class="test-section-heading">
+              <div><p class="research-kicker">MANUAL INPUT</p><h2 id="testEntryTitle">Enter a result</h2></div>
+              <strong id="testLastResult">No results</strong>
+            </div>
+            <div class="test-number-pad" id="testNumberPad" aria-label="European roulette result keypad"></div>
+            <div class="test-generator-row">
+              <button class="btn" id="btnGenerateOne" type="button">Generate Random Spin</button>
+              <label for="testBatchCount">Batch</label>
+              <select id="testBatchCount" aria-label="Random spins per batch">
+                <option value="10">10 spins</option>
+                <option value="50">50 spins</option>
+                <option value="100">100 spins</option>
+              </select>
+              <button class="btn" id="btnGenerateBatch" type="button">Generate sequence</button>
+            </div>
+            <div class="test-edit-row">
+              <label for="testCorrectionNumber">Correct recent result</label>
+              <select id="testCorrectionNumber" aria-label="Select a recent result to correct"></select>
+              <input id="testCorrectionValue" type="number" min="0" max="36" step="1" inputmode="numeric" placeholder="0-36" aria-label="Corrected roulette outcome" />
+              <button class="btn" id="btnCorrectTest" type="button">Correct</button>
+              <button class="btn" id="btnUndoTest" type="button">Undo last</button>
+            </div>
+            <div class="test-reset-row">
+              <button class="btn" id="btnResetTest" type="button">Reset this test session</button>
+              <span id="testInputStatus" role="status" aria-live="polite">Manual entries are temporary synthetic test data.</span>
+            </div>
+          </section>
+
+          <aside class="test-intelligence-panel" aria-labelledby="testIntelligenceTitle">
+            <p class="research-kicker">BANK-ROLL INTELLIGENCE</p>
+            <h2 id="testIntelligenceTitle">Current response</h2>
+            <dl class="test-metrics">
+              <div><dt>Test spins</dt><dd id="testSpinCount">0</dd></div>
+              <div><dt>Current forecast</dt><dd id="testForecast">Gathering observations</dd></div>
+              <div><dt>Selected model</dt><dd id="testModel">Uniform baseline</dd></div>
+              <div><dt>Forecast score</dt><dd id="testScore">0 scored</dd></div>
+              <div><dt>Current test recommendation</dt><dd id="testDecision">OBSERVE</dd></div>
+              <div><dt>Simulated bankroll</dt><dd id="testBankroll">£100.00</dd></div>
+              <div><dt>Session profit/loss</dt><dd id="testProfitLoss">£0.00</dd></div>
+              <div><dt>Data provenance</dt><dd>TEST · SYNTHETIC</dd></div>
+            </dl>
+            <h3 class="test-model-heading">Model comparison · multicategory Brier</h3>
+            <ul id="testModelScores" class="test-history-list" aria-label="Temporary test model scores"></ul>
+            <p class="test-forecast-detail" id="testForecastDetail">Forecasts are made before each next test result. Test outcomes cannot update live tables or shared research.</p>
+            <p class="test-companion-message" id="testCompanionMessage" aria-live="polite">BRI is ready to experiment.</p>
+          </aside>
+        </div>
+
+        <section class="test-street-section" aria-labelledby="testStreetsTitle">
+          <div class="test-section-heading"><div><p class="research-kicker">DATASET LOCAL</p><h2 id="testStreetsTitle">Street activity</h2></div><span id="testExpected">Fair expectation: 0.0 per street</span></div>
+          <div class="research-table-wrap">
+            <table class="research-table">
+              <thead><tr><th scope="col">Street</th><th scope="col">Observed / expected</th><th scope="col">Recent 100</th><th scope="col">Current gap</th></tr></thead>
+              <tbody id="testStreetRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="test-lower-grid">
+          <section class="test-history-section" aria-labelledby="testHistoryTitle">
+            <div class="test-section-heading"><div><p class="research-kicker">MOST RECENT 50</p><h2 id="testHistoryTitle">Entered sequence</h2></div><span id="testHistoryCount">0 results</span></div>
+            <ol class="test-history-list" id="testHistoryList"><li>No test results yet.</li></ol>
+          </section>
+          <section class="test-events-section" aria-labelledby="testEventsTitle">
+            <div class="test-section-heading"><div><p class="research-kicker">SIGNIFICANT CHANGES</p><h2 id="testEventsTitle">BRI test timeline</h2></div></div>
+            <ol class="test-history-list" id="testEventList"><li>No research events yet.</li></ol>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="src/ui/sandbox-app.js"></script>
+</body>
+</html>

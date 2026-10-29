@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Technical documentation for Bank-Roll's implemented architecture, Test Mode, research methods, data integrity, security boundaries and reproducibility." />
+  <meta property="og:title" content="Technical Documentation | Bank-Roll" />
+  <meta property="og:description" content="Implementation-accurate guides to Bank-Roll and BRI, with experimental and planned capabilities labelled clearly." />
+  <link rel="canonical" href="https://bank-roll.uk/docs" />
+  <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <title>Technical Documentation | Bank-Roll</title>
+</head>
+<body class="knowledge-document">
+  <div class="knowledge-shell">
+    <header class="research-public-header">
+      <a class="research-brand" href="index.html"><strong>Bank-Roll</strong><span>WINNING STREETS · DOCUMENTATION</span></a>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Laboratory</a>
+        <a href="test-mode.html">Test Mode</a>
+        <a href="faq.html">FAQ</a>
+        <a href="research.html">Research</a>
+      </nav>
+    </header>
+
+    <main>
+      <header class="knowledge-heading">
+        <p class="research-kicker">TECHNICAL REFERENCE · IMPLEMENTED SCOPE</p>
+        <h1>Bank-Roll documentation</h1>
+        <p>This guide describes the software currently in the repository. Sections marked planned are not available features; a profile label or consent flag is not independent proof of physical observation.</p>
+        <label class="knowledge-search-label" for="docsSearch">Search documentation</label>
+        <input id="docsSearch" data-document-search type="search" placeholder="Try: migrations, expiry, Brier, provenance" autocomplete="off" />
+        <span class="knowledge-search-status" data-document-search-status role="status" aria-live="polite"></span>
+        <p data-document-empty hidden>No documentation sections match that search. Try another term.</p>
+        <p class="knowledge-version">Reviewed 29 October 2026 · Describes the current implementation; planned features are labelled.</p>
+      </header>
+
+      <div class="knowledge-layout">
+        <nav class="knowledge-sidebar" aria-label="Documentation contents">
+          <a href="#start">Getting Started</a>
+          <a href="#live">Human Observation</a>
+          <a href="#test-mode">Test Mode</a>
+          <a href="#lab">Research Laboratory</a>
+          <a href="#architecture">BRI Architecture</a>
+          <a href="#randomness">Randomness Integrity</a>
+          <a href="#statistics">Statistical Methodology</a>
+          <a href="#data-integrity">Data Integrity</a>
+          <a href="#collective">Collective Intelligence</a>
+          <a href="#publishing">Living Website</a>
+          <a href="#developers">Developers</a>
+          <a href="#reproducibility">Reproducibility</a>
+        </nav>
+
+        <div class="knowledge-content">
+          <section class="knowledge-group" id="start" data-document-group aria-labelledby="startTitle">
+            <p class="research-kicker">01 / SETUP</p>
+            <h2 id="startTitle">Getting Started</h2>
+            <article data-searchable>
+              <h3>Requirements</h3>
+              <p>The browser application uses HTML, CSS and native JavaScript ES modules. A web server over HTTPS is required; opening the page as a <code>file://</code> URL is not supported. Browser-only simulation and Test Mode do not require a database. Persistent account storage uses PHP 8.1+ with PDO MySQL and MySQL/MariaDB. Node.js is used for development tests and research scripts, not as a production service.</p>
+            </article>
+            <article data-searchable>
+              <h3>cPanel installation</h3>
+              <p>Upload the intended public files while preserving the <code>assets/</code>, <code>src/</code> and <code>server/</code> directory structure. Keep the root and private <code>.htaccess</code> files. Configure database credentials and the registration secret outside the web root using <code>BANKROLL_CONFIG_FILE</code> or PHP environment variables. Never put real credentials in the shipped example configuration.</p>
+              <p>When provisioning persistent storage, import migrations 001 through 006 in numeric order into a backed-up database. Migration 006 adds an account active-table pointer. Database integration for the latest migrations was not verified in the current development container because PDO MySQL is unavailable.</p>
+            </article>
+            <article data-searchable>
+              <h3>Operating modes</h3>
+              <p>The current site provides a simulated live laboratory, a separate browser-only Test Mode, and structured research scripts. Public human Live Observation entry and CSV/historical import are not yet implemented. The PHP server rejects observed-origin session creation and writes by default unless its private <code>BANKROLL_ALLOW_OBSERVED_SUBMISSIONS</code> setting is explicitly enabled; do not enable it until the missing safeguards are built and verified.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="live" data-document-group aria-labelledby="liveTitle">
+            <p class="research-kicker">02 / LIVE OBSERVATION</p>
+            <h2 id="liveTitle">Human Observation</h2>
+            <article data-searchable>
+              <h3>Current status</h3>
+              <p>There is no public manual live-entry UI in this version. The persistent table profile system applies to simulated profiles; it separates a table identifier from observation-session identifiers and can restore table-specific model state. This identity does not prove that a particular physical wheel was watched or that a sequence was uninterrupted.</p>
+            </article>
+            <article data-searchable>
+              <h3>Continuity and observer changes</h3>
+              <p>Pause/resume markers, missing-spin declarations, sequence-continuity metadata, observer/dealer/player handover records, and conflicting-stream reconciliation are planned, not implemented. Until these exist, the system must not infer that results across a human observation break are adjacent spins.</p>
+            </article>
+            <article data-searchable>
+              <h3>Submission safeguards</h3>
+              <p>Observed-origin API submissions are disabled by default on the PHP backend. There is no verified atomic live cadence limiter, suspicious-submission quarantine, observer authentication workflow or administrator review queue. Authentication, provenance labels and a cohort UUID alone do not prove that data is genuine.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="test-mode" data-document-group aria-labelledby="testTitle">
+            <p class="research-kicker">03 / TEMPORARY SANDBOX</p>
+            <h2 id="testTitle">Test Mode</h2>
+            <article data-searchable>
+              <h3>Data handling</h3>
+              <p>Test Mode runs in a dedicated page using an isolated `TestModeSession` and the real BRI coordinator, predictor, event stream, bankroll safeguards and companion. It labels all results `sourceType=test` and synthetic. It has no database client, fetch calls, localStorage, sessionStorage or IndexedDB access and uses no live table ID.</p>
+            </article>
+            <article data-searchable>
+              <h3>Limits and expiry</h3>
+              <p>A session accepts at most 5,000 outcomes; generated batches are limited to 100. Its deadline is fixed at creation plus 24 hours and activity/reset never extends it. End/discard clears session arrays, coordinator, event stream and companion state; page navigation discards the in-memory session. It cannot be resumed after a reload and is not included in server backups.</p>
+            </article>
+            <article data-searchable>
+              <h3>Forecast chronology</h3>
+              <p>For each manual or generated result, the coordinator prepares the next forecast and decision first, then processes the outcome and scores the forecast. Corrections replay only the temporary test sequence. Nothing from this page enters live table profiles, shared aggregates, public findings or persistent archives.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="lab" data-document-group aria-labelledby="labTitle">
+            <p class="research-kicker">04 / EXPERIMENTS</p>
+            <h2 id="labTitle">Research Laboratory</h2>
+            <article data-searchable>
+              <h3>Structured simulations</h3>
+              <p>The research scripts run seeded uniform, biased and changing-distribution synthetic scenarios and compare existing production strategies on common sequences. The autonomous research laboratory supports cancellation and bounded aggregate reports; benchmark JSON is retained in the development repository and is blocked from direct web access.</p>
+            </article>
+            <article data-searchable>
+              <h3>Historical datasets and imports</h3>
+              <p>CSV imports, large historical-data upload, column mapping, import preview, retrospective replay and export UI are not implemented. A provided in-memory sequence can be used by existing research APIs, but is not an import workflow or prospective live evaluation.</p>
+            </article>
+            <article data-searchable>
+              <h3>Research retention</h3>
+              <p>Structured experiment results are distinct from Test Mode's disposable memory and from any future human live-observation archive. Test Mode's 24-hour expiry does not apply to research-result files. Public experiment pages and a persistent experiment catalogue are not yet implemented.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="architecture" data-document-group aria-labelledby="architectureTitle">
+            <p class="research-kicker">05 / SOFTWARE</p>
+            <h2 id="architectureTitle">BRI Architecture</h2>
+            <article data-searchable>
+              <h3>Observation and learning</h3>
+              <p><code>StreetTracker</code> incrementally maintains twelve street totals, gaps, streaks and a bounded rolling history. <code>StreetPredictionEngine</code> issues forecasts after its warm-up, evaluates stored candidate distributions after outcomes and maintains model scores. <code>BriCoordinator</code> stages forecast and decision before the outcome, then scores/learns and settles using existing exact-cent accounting.</p>
+            </article>
+            <article data-searchable>
+              <h3>Strategy and finances</h3>
+              <p><code>decision-engine.js</code> compares CONTINUE, SWITCH, SPREAD and STOP under common limits. <code>accounting.js</code> independently validates the proposed simulated wager and settles exact integer pence. Strategies and forecasts are exploratory; they do not establish positive expected value.</p>
+            </article>
+            <article data-searchable>
+              <h3>Persistence</h3>
+              <p>The optional PHP API uses bearer tokens whose hashes are stored server-side, prepared SQL statements, owner-scoped records, append-only correction history and migrations 001–006. The browser has a bounded offline outbox. PHP/MySQL integration for this exact release is not verified here because PDO MySQL/test DB settings are absent.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="randomness" data-document-group aria-labelledby="randomTitle">
+            <p class="research-kicker">06 / SEQUENCE RESEARCH</p>
+            <h2 id="randomTitle">Randomness Integrity</h2>
+            <article data-searchable>
+              <h3>Uniformity is not independence</h3>
+              <p>Uniformity describes marginal frequencies; independence asks whether the past changes conditional probabilities for the next outcome. The current simulator uses seeded Mulberry32 and `floor(draw * 37)` for reproducible outcomes. It does not inspect history, and it is not cryptographic randomness.</p>
+            </article>
+            <article data-searchable>
+              <h3>What is implemented</h3>
+              <p>Current research tracks frequency and forward scores for fixed frequency models. Dedicated lagged transition tests, streak-null comparisons, periodicity controls, conditional models and a blind predictability challenge are not implemented. The finite-grid mapping remainder and current audit scope are described in the linked Randomness Integrity report in the repository, not as a public finding about commercial systems.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="statistics" data-document-group aria-labelledby="statisticsTitle">
+            <p class="research-kicker">07 / EVALUATION</p>
+            <h2 id="statisticsTitle">Statistical Methodology</h2>
+            <article data-searchable>
+              <h3>Proper scores and baseline</h3>
+              <p>The prediction engine scores 13 categories (twelve streets and zero) with multicategory Brier score after each forecast's outcome. The uniform European baseline assigns 3/37 to each street and 1/37 to zero. A Brier improvement measures forecast quality, not profitability.</p>
+            </article>
+            <article data-searchable>
+              <h3>Calibration and uncertainty</h3>
+              <p>The current UI does not provide a complete calibration curve or independent holdout assessment. Evidence-Gated uses an anytime-adjusted paired Brier comparison against uniform, but the model family and validation remain limited. Do not equate observation count, a candidate anomaly or a sample win rate with confidence.</p>
+            </article>
+            <article data-searchable>
+              <h3>Repeated testing and false positives</h3>
+              <p>Searching many streets, windows, lags and hypotheses increases the chance of finding an apparent pattern by chance. Sequence-dependence tests and their multiple-comparison controls have not yet been implemented. Any future claim must identify its test family, validation split and false-positive performance.</p>
+            </article>
+            <article data-searchable>
+              <h3>Expected return</h3>
+              <p>For a single street with conditional win probability p, expected net return per unit is 12p - 1; break-even is 1/12. The fair baseline is 3/37 and has a -1/37 expectation. Estimated conditional probabilities require uncertainty and prospective validation before financial interpretation.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="data-integrity" data-document-group aria-labelledby="integrityTitle">
+            <p class="research-kicker">08 / TRUST BOUNDARY</p>
+            <h2 id="integrityTitle">Data Integrity</h2>
+            <article data-searchable>
+              <h3>Provenance and corrections</h3>
+              <p>The schema distinguishes synthetic and observed origin; corrections append revisions and trigger derived-state rebuilds. The client-reported False Entry Challenge remains marked unverified. A provenance label is metadata, not independent proof of source authenticity.</p>
+            </article>
+            <article data-searchable>
+              <h3>Live safeguards</h3>
+              <p>Observed-origin sessions and submissions are rejected by default unless the private server flag is enabled. There is no production-ready human cadence rate limit, quarantine queue, import parser or admin review system. Keep `BANKROLL_ALLOW_OBSERVED_SUBMISSIONS=false` until those controls and the MySQL integration path are built and verified.</p>
+            </article>
+            <article data-searchable>
+              <h3>Authentication and output</h3>
+              <p>Persistent API routes require a bearer token; queries are scoped to the authenticated owner and user-facing dynamic text uses text nodes. The browser API client restricts its configured URL to same-origin HTTPS outside localhost. A full third-party security audit has not been performed.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="collective" data-document-group aria-labelledby="collectiveTitle">
+            <p class="research-kicker">09 / SHARED DATA</p>
+            <h2 id="collectiveTitle">Collective Intelligence</h2>
+            <article data-searchable>
+              <h3>Consent and cohorts</h3>
+              <p>The optional aggregate endpoint requires player-level and per-session consent, observed origin, a caller-owned cohort UUID and matching roulette table type. It returns aggregate street totals, not per-player or per-table details. The current simulator writes synthetic data and is excluded.</p>
+            </article>
+            <article data-searchable>
+              <h3>What a cohort does not establish</h3>
+              <p>A cohort UUID is a grouping key, not proof that contributors observed the same physical table or the same consecutive spins. Conflicting observer streams, independent physical identity checks, and sequence reconciliation are future work.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="publishing" data-document-group aria-labelledby="publishingTitle">
+            <p class="research-kicker">10 / PUBLICATION</p>
+            <h2 id="publishingTitle">Living Website and Documentation</h2>
+            <article data-searchable>
+              <h3>Current pages</h3>
+              <p>The site currently has the simulator, a static research/methodology page, FAQ and technical guide. The live research panel updates from the browser's current synthetic dataset. No persistent public research journal, hypothesis archive or dynamic experiment catalogue exists.</p>
+            </article>
+            <article data-searchable>
+              <h3>Evidence-protected publishing</h3>
+              <p>FAQ and technical documentation are authored static files. Search filters existing text in the browser. There is no automatic documentation-writing, content proposal, administrator editorial workflow or publication API; user data cannot directly update these pages.</p>
+            </article>
+            <article data-searchable>
+              <h3>Future governance</h3>
+              <p>Any future research publishing should bind claims to eligible evidence, provenance, method and model version, keep revisions/audit history, and require human approval for new scientific or financial conclusions. No autonomous publishing authority is enabled.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="developers" data-document-group aria-labelledby="developersTitle">
+            <p class="research-kicker">11 / DEVELOPMENT</p>
+            <h2 id="developersTitle">Developers</h2>
+            <article data-searchable>
+              <h3>Repository layout</h3>
+              <p>Core roulette/math and seeded randomness are in `src/core/`; incremental tracking is in `src/observation/`; models and orchestration are in `src/intelligence/`; wager logic is in `src/strategies/` and `src/bankroll/`; simulation and experiment runners are in `src/simulation/`; browser presentation lives in `src/ui/`; the optional API client is in `src/storage/`.</p>
+            </article>
+            <article data-searchable>
+              <h3>Test commands</h3>
+              <pre><code>npm test
+npm run test:php
+find server tests/php -name '*.php' -print0 | xargs -0 -n1 php -l</code></pre>
+              <p>The MySQL integration test requires a disposable database, PDO MySQL, and `BANKROLL_TEST_DB_*` variables. A skipped run is not DB verification. The local suite currently has one such environment-dependent skip.</p>
+            </article>
+            <article data-searchable>
+              <h3>Security-sensitive configuration</h3>
+              <p>Keep real PHP database/registration secrets outside the web root. The root and private `.htaccess` rules are intended for Apache/cPanel. This container does not include Apache's config checker, so validate those directives on the target host before deployment.</p>
+            </article>
+          </section>
+
+          <section class="knowledge-group" id="reproducibility" data-document-group aria-labelledby="reproTitle">
+            <p class="research-kicker">12 / REPRODUCIBILITY</p>
+            <h2 id="reproTitle">Research Reproducibility</h2>
+            <article data-searchable>
+              <h3>Seeds, scenarios and outputs</h3>
+              <p>Existing benchmark scripts derive deterministic streams from documented seed strings and retain scenario/configuration metadata and sequence hashes. The generator is deterministic Mulberry32 seeded from a 32-bit FNV-1a reduction and is not cryptographically secure. Research result JSON in the development tree contains synthetic analysis artifacts and is not served as public evidence.</p>
+            </article>
+            <article data-searchable>
+              <h3>Independent replication</h3>
+              <p>A seed and configuration make a synthetic experiment repeatable; they do not make a result independent or validate its assumptions. An independent researcher should reproduce the generator, inputs, model version, chronological split, scoring procedure and exclusions before treating a claim as confirmed.</p>
+            </article>
+          </section>
+
+          <footer class="research-public-footer">
+            <span>Documentation describes the current implementation; planned work is labelled.</span>
+            <a href="index.html">Return to the laboratory</a>
+          </footer>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="src/ui/documentation-search.js"></script>
+</body>
+</html>

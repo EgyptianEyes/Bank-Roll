@@ -68,7 +68,8 @@ No empty research pages were created. The panel displays an explicit empty state
 | Evidence-backed live explanation | Partial | Uses actual tracker/model/forecast values. No active hypothesis registry or calibration estimator exists. |
 | Large-experiment UI responsiveness | Partially supported | Research computation already has a Worker path; this panel batches DOM changes. Million-spin browser/UI memory and throughput were not benchmarked in this phase. |
 | Persistent research archive | Not implemented by this phase | Existing event/prediction persistence remains available for configured sessions, but the new timeline and content are not persisted as research records. |
-| Dynamic research pages and SEO metadata | Not implemented | No router/page definitions/sitemap added. |
+| FAQ and technical documentation | Implemented as searchable static pages | `/faq` and `/docs` route to authored HTML; search only filters existing DOM text. No dynamic content definitions, sitemap or autonomous update pipeline. |
+| Dynamic research pages and SEO metadata | Not implemented | No generated research-page router, page definitions, sitemap or per-finding canonical pages added. |
 | BRI Publishing Intelligence | Not implemented | No content proposal or publishing authority exists. |
 | Editorial administration | Not implemented | No admin role, CSRF flow, preview/review/approve/reject/unpublish/rollback endpoints or audit log. |
 | Autonomous code modification/deployment | Prohibited and absent | Generated content is not code; no code-generation or deployment feature was added. |
@@ -77,16 +78,17 @@ No empty research pages were created. The panel displays an explicit empty state
 | Public methodology page | Implemented as static page | `research.html` is linked from the homepage and covers project scope, European wheel math, forecast method and limits; no dynamic research archive is published. |
 | Persistent table identity | Implemented for simulated profiles | Local multi-profile registry and confirmed switch; account-level active table is persisted via migration 006 and owner-checked API. No human observation mode, observer/dealer metadata, or gap/continuity markers exists. |
 | Human observation integrity | Not implemented | Current app records synthetic simulation outcomes only. No human-entry UI, rate limiting, anomaly quarantine, import mode, or admin review. Table/cohort identifiers do not authenticate physical identity. |
+| Isolated Test Mode | Implemented locally; not part of pushed v1.0.0 | Uses the production BRI coordinator and predictor, temporary `test` provenance, fixed 24-hour expiry, bounded generation and immediate discard. No storage/API imports; the session disappears on page close. |
 
 ## Tests and Limitations
 
-- `npm test`: 91 passed, 0 failed, 1 skipped (92 tests total). The skipped MySQL integration test requires PDO MySQL and `BANKROLL_TEST_DB_*` settings.
+- `npm test`: 105 passed, 0 failed, 1 skipped (106 tests total). The skipped MySQL integration test requires PDO MySQL and `BANKROLL_TEST_DB_*` settings.
 - `npm run test:php`: passed.
 - `php -l` across `server/` and `tests/php/`: passed.
 - Focused research-event and page tests: 9 passed.
 - Table-profile registry tests: 4 passed; active-table dialog checks are included in the page integration tests.
 - Database migrations and API integration were not exercised in this environment.
-- No Playwright/browser screenshot, mobile visual comparison, assistive-technology test, security penetration test, or million-spin UI profile was performed. The local PHP preview server was not running at the initial HTTP check and is being started for this handoff.
+- No Playwright/browser screenshot, mobile visual comparison, assistive-technology test, security penetration test, or million-spin UI profile was performed. Test Mode changes remain uncommitted and are not in the published v1.0.0 package.
 
 ## Next Work
 

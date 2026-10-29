@@ -19,6 +19,10 @@ php tests/php/run.php
 
 See [architecture](docs/architecture.md), [mathematics](docs/mathematics.md), [development](docs/development.md), and [server API](docs/server-api.md).
 
+Public guides: [FAQ](/faq) and [technical documentation](/docs). These pages are static authored content; visitor input and research data cannot rewrite them.
+
+Public knowledge pages: [FAQ](/faq) and [technical documentation](/docs). These authored pages describe implemented behavior and explicitly label incomplete or unproven areas; user submissions cannot modify them.
+
 Release status and the deployable cPanel package are documented in the [v1.0.0 release report](BANK-ROLL-RELEASE-REPORT.md).
 
 ## Current scope
@@ -28,6 +32,12 @@ The existing interface and roulette board are retained. Live runs offer the orig
 The integrity monitor flags structural contradictions and statistical shift candidates without treating surprising results as verified errors. The False Entry Challenge runs isolated synthetic cases and stores aggregate benchmark reports. The Configuration panel can review and explicitly correct recent server-recorded events; corrections append revisions, preserve original events/evaluations, and invalidate derived state. The rebuild endpoint reconstructs derived statistics from the effective history idempotently, and forecasting resumes only after the client uploads a chronologically rebuilt model checkpoint. Shared aggregates require player and session consent plus an explicit shared-cohort UUID and matching table type; only corrected observed results are pooled. The current simulator records synthetic results, which are excluded from shared aggregates. Human observed-origin session creation and outcome submissions are rejected by the PHP API by default (`BANKROLL_ALLOW_OBSERVED_SUBMISSIONS=false`) until rate limiting, provenance enforcement and database integration have been verified. This is a release safety gate, not a human-observation verification system. Monetary values, stakes and progressions are bounded to exact safe-integer minor units. The schema and API are integration-tested against MySQL/MariaDB by `tests/integration/server-db.test.js`; on hosts where that suite cannot run, follow the deployment-side verification procedure in [server API](docs/server-api.md). Remaining work includes adaptive model lifecycle/holdout validation, hypothesis and experiment management, 100-spin Monte Carlo planning, a worker-backed research UI, manual/import workflows, and authentication recovery.
 
 The live research panel now follows every resolved simulator outcome with current-dataset street profiles, a last-100 number-frequency view, forward-scored model summaries, and an in-memory timeline of significant events. It labels the simulator's data as synthetic, distinguishes sample maturity from predictive confidence, and does not claim that calibration or a hypothesis archive exists.
+
+## Try BRI Safely
+
+Open [Test Mode](test-mode.html) to enter any result from 0 to 36 or generate up to 100 seeded random spins per batch (5,000 per temporary session). It runs the real BRI coordinator, prediction engine, decision policies, financial safeguards and optional companion locally in page memory. Its provenance is `test`/synthetic; it makes no server requests, does not use a table ID, and cannot enter live or shared research. A fixed 24-hour deadline is not extended by activity, and **End Test & Discard Results** clears the session immediately. Closing or navigating away discards it. Live human observations remain disabled by default on the PHP server until server-side validation, rate limiting and database tests are verified. Test Mode is separate from the reproducible structured Research Laboratory and the persistent simulated table profiles.
+
+Bank-Roll now distinguishes three workflows: Live Observation is intended for persistent real-table evidence but remains server-gated and has no public human-entry UI; Test Mode is anonymous, memory-only and disposable; the Research Laboratory runs structured, seeded experiments with research provenance and separate retention. Test Mode does not promote or transfer data into either other workflow. See [BANK-ROLL-TEST-MODE-REPORT.md](BANK-ROLL-TEST-MODE-REPORT.md) for boundaries, expiry and verification. Test Mode is implemented in this working tree but is not part of the pushed v1.0.0 release.
 
 ## Persistent Table Identity
 

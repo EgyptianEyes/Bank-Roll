@@ -1,6 +1,7 @@
 export function createResearchSnapshot(engine, {
   datasetId,
   dataOrigin = "synthetic",
+  sourceType = dataOrigin === "synthetic" ? "simulation" : "observed",
   outcome,
   evaluation = null,
   integrity = null,
@@ -28,6 +29,7 @@ export function createResearchSnapshot(engine, {
   return Object.freeze({
     datasetId,
     dataOrigin,
+    sourceType,
     observationCount,
     outcome,
     updatedAt,

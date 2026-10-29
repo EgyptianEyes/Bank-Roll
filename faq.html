@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Answers about Bank-Roll, BRI, roulette street mathematics, forecasting, research modes, privacy and what remains unproven." />
+  <meta property="og:title" content="Frequently Asked Questions | Bank-Roll" />
+  <meta property="og:description" content="Understand Bank-Roll's roulette research, BRI's methods, the mathematics and the limitations." />
+  <link rel="canonical" href="https://bank-roll.uk/faq" />
+  <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <title>Frequently Asked Questions | Bank-Roll</title>
+</head>
+<body class="knowledge-document">
+  <div class="knowledge-shell">
+    <header class="research-public-header">
+      <a class="research-brand" href="index.html"><strong>Bank-Roll</strong><span>WINNING STREETS · QUESTIONS</span></a>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Laboratory</a>
+        <a href="test-mode.html">Try BRI</a>
+        <a href="research.html">Research</a>
+        <a href="/docs">Technical docs</a>
+      </nav>
+    </header>
+
+    <main>
+      <header class="knowledge-heading">
+        <p class="research-kicker">BANK-ROLL · BRI · EUROPEAN ROULETTE</p>
+        <h1>Frequently asked questions</h1>
+        <p>Clear answers about the project, the mathematics, BRI's current capabilities and what the evidence does not establish.</p>
+        <label class="knowledge-search-label" for="faqSearch">Search questions and answers</label>
+        <input id="faqSearch" data-document-search type="search" placeholder="Try: house edge, forecast, Test Mode" autocomplete="off" />
+        <span class="knowledge-search-status" data-document-search-status role="status" aria-live="polite"></span>
+        <p data-document-empty hidden>No FAQ answers match that search. Try another term.</p>
+        <p class="knowledge-version">Reviewed 29 October 2026 · Static authored answers; not an automated research feed.</p>
+      </header>
+
+      <nav class="knowledge-index" aria-label="FAQ categories">
+        <a href="#about">Project</a><a href="#math">Mathematics</a><a href="#bri">BRI</a><a href="#strategies">Strategies</a><a href="#modes">Research modes</a><a href="#integrity">Integrity and privacy</a><a href="#evidence">Evidence and future</a>
+      </nav>
+
+      <section class="knowledge-group" id="about" data-document-group aria-labelledby="aboutTitle">
+        <p class="research-kicker">01 / THE PROJECT</p>
+        <h2 id="aboutTitle">Bank-Roll and Winning Streets</h2>
+        <details data-searchable><summary>What is Bank-Roll?</summary><p>Bank-Roll is a European roulette simulator and computational research project focused on street betting, probability, forecasting and risk. It provides reproducible simulations and a transparent place to test hypotheses; it is not a casino, betting service or promise of returns.</p></details>
+        <details data-searchable><summary>What is Bank-Roll Intelligence?</summary><p>Bank-Roll Intelligence (BRI) is the project's collection of observation, forecasting, strategy, integrity and research components. BRI currently uses a small fixed family of models and explicit financial safeguards. It is not a general-purpose artificial intelligence and does not discover arbitrary scientific truths on its own.</p></details>
+        <details data-searchable><summary>Why investigate roulette?</summary><p>Roulette gives the project a precise probability baseline and clear financial rules, making it useful for studying randomness, model evaluation and the difference between a pattern and reliable evidence. The aim is to investigate claims carefully, including the possibility that no exploitable information exists.</p></details>
+        <details data-searchable><summary>Why focus on streets?</summary><p>A street is a group of three adjacent numbers in the standard betting layout. Bank-Roll's original research interest is whether street frequencies or conditional street probabilities differ from the fair European baseline in a way that survives forward testing. A street looking frequent or overdue in a short sample does not make it more likely on the next spin.</p></details>
+        <details data-searchable><summary>What is the long-term objective?</summary><p>The objective is to build a transparent body of reproducible research about roulette probabilities, forecasting and risk. New claims should be traceable to eligible data and validation, while failures and uncertainty remain visible.</p></details>
+      </section>
+
+      <section class="knowledge-group" id="math" data-document-group aria-labelledby="mathTitle">
+        <p class="research-kicker">02 / MATHEMATICS</p>
+        <h2 id="mathTitle">Probabilities and payouts</h2>
+        <details data-searchable><summary>How does an 11/1 street bet work?</summary><p>A street bet covers three numbers. If one of them wins, the bet returns 11 units of profit plus the original stake, or 12 units gross; if any other number, including zero, appears, the full stake is lost.</p></details>
+        <details data-searchable><summary>What is the theoretical house edge?</summary><p>For a standard single-zero European wheel, a one-unit street wager wins with probability 3/37 and earns 11 units net, otherwise it loses one unit. Its expected net is 11(3/37) - 34(1/37) = -1/37, a house edge of about 2.7027% per unit staked.</p></details>
+        <details data-searchable><summary>What probability makes a street profitable?</summary><p>A single street's expected net per unit is 12p - 1, where p is the probability of that street winning on the next spin. The break-even probability is 1/12, about 8.3333%, slightly above the fair-wheel probability 3/37, about 8.1081%; an estimate above break-even is not proof that the true probability is above it.</p></details>
+        <details data-searchable><summary>What is the difference between randomness and pseudorandomness?</summary><p>An ideal independent random process has outcomes drawn from its specified distribution without dependence on prior outcomes. A pseudorandom generator is a deterministic algorithm with internal state that produces a sequence intended to resemble random output; determinism alone does not mean an observer can practically predict it. Bank-Roll's seeded Mulberry32 generator is for reproducible simulation, not cryptographic security.</p></details>
+        <details data-searchable><summary>Can roulette genuinely be beaten?</summary><p>Bank-Roll has not established a profitable real-world roulette strategy. A genuine advantage would require reliable prospective evidence, uncertainty analysis, appropriate payout calculations and realistic execution, not a short winning run or a retrospective pattern.</p></details>
+        <details data-searchable><summary>Can a progression overcome the house edge?</summary><p>No staking progression changes the underlying outcome probabilities or expected return per unit staked. Progressions can change the distribution and timing of wins and losses, but they can also increase exposure and the risk of losing a larger bankroll share.</p></details>
+      </section>
+
+      <section class="knowledge-group" id="bri" data-document-group aria-labelledby="briTitle">
+        <p class="research-kicker">03 / BRI</p>
+        <h2 id="briTitle">Models, learning and decisions</h2>
+        <details data-searchable><summary>What does BRI actually learn?</summary><p>The current predictor updates street counts, rolling history, exponentially weighted category counts and forward-scored model summaries. It compares a fixed set of uniform, rolling-frequency and exponential-frequency models; it does not autonomously invent arbitrary models or prove that a table is biased.</p></details>
+        <details data-searchable><summary>How does BRI evaluate forecasting models?</summary><p>After ten observations the predictor can issue a forecast for the next spin. The distribution is stored before the outcome and scored only afterwards using a 13-category Brier score, with twelve streets and zero as a separate category.</p></details>
+        <details data-searchable><summary>Can previous outcomes predict future outcomes?</summary><p>Under an independent-wheel model, knowing previous outcomes does not change the probability of the next spin. Bank-Roll is interested in testing whether particular systems violate that assumption, but the current release has not implemented sequential-dependence tests or established a real-world predictive relationship.</p></details>
+        <details data-searchable><summary>What is a Brier score?</summary><p>A Brier score measures the squared error of a probability distribution against the category that actually occurred; lower scores are better. BRI compares candidate models on the same forward outcomes and against the uniform baseline, but this alone is not a complete calibration or independent-holdout programme.</p></details>
+        <details data-searchable><summary>How does BRI distinguish evidence from coincidence?</summary><p>Forecasts are evaluated after their outcomes, and the evidence-gated mode requires an adjusted forward score comparison against uniform before authorising experimental wagering. Statistical shift alerts are labelled candidates, not verified errors; independent physical-table validation is not yet available through the public site.</p></details>
+        <details data-searchable><summary>What are CONTINUE, SWITCH, SPREAD and STOP?</summary><p>The decision engine compares continuing on current streets, switching to candidate streets, spreading across streets, or stopping wagers while continuing to observe. It calculates candidates under shared bankroll and risk constraints; the coordinator can still reject or replace a proposed wager with observation when evidence or limits require it.</p></details>
+        <details data-searchable><summary>How does BRI manage the bankroll?</summary><p>Wager values are represented in integer pence and pass independent stake, exposure, bankroll and stop-loss checks. Autonomous decisions do not override those checks, and STOP means no wager rather than abandoning observation.</p></details>
+        <details data-searchable><summary>Does observation maturity mean prediction confidence?</summary><p>No. The live panel's maturity indicator is a bounded sample-size display, reaching its initial threshold at 100 outcomes. It is not a probability that the model is correct or an estimate of betting confidence.</p></details>
+        <details data-searchable><summary>Can BRI change its own software?</summary><p>No. There is no autonomous code editing or deployment capability. Any future publishing proposals must use approved structured content and human review; software changes remain a separate human-controlled release process.</p></details>
+      </section>
+
+      <section class="knowledge-group" id="strategies" data-document-group aria-labelledby="strategiesTitle">
+        <p class="research-kicker">04 / STRATEGIES AND RISK</p>
+        <h2 id="strategiesTitle">Decisions are not guarantees</h2>
+        <details data-searchable><summary>Can roulette genuinely be beaten by a physical wheel bias?</summary><p>A physical wheel could in principle develop mechanical irregularities, but Bank-Roll has not measured or validated such an effect on a real wheel. Any proposed bias would need carefully collected observations, table identity and independent forward validation before it could be treated as evidence.</p></details>
+        <details data-searchable><summary>Can automated roulette systems contain predictable behaviour?</summary><p>Software and mechanical systems can have implementation defects, but no defect in a third-party system is claimed here. The current public application studies its own reproducible synthetic simulations; it does not test or interact with commercial roulette systems.</p></details>
+        <details data-searchable><summary>What is the gambler's fallacy?</summary><p>The gambler's fallacy is assuming an independent outcome becomes due because it has not appeared recently, or that a run must immediately reverse. Under the ideal independent European model, the next spin's probabilities do not depend on the previous sequence.</p></details>
+        <details data-searchable><summary>What does STOP mean?</summary><p>STOP suspends betting under the current decision policy while the simulation can continue observing and scoring outcomes. It is a risk-control decision, not a claim that the wheel has changed or that a losing streak must continue.</p></details>
+      </section>
+
+      <section class="knowledge-group" id="modes" data-document-group aria-labelledby="modesTitle">
+        <p class="research-kicker">05 / RESEARCH MODES</p>
+        <h2 id="modesTitle">Different data, different meaning</h2>
+        <details data-searchable><summary>What is the difference between Live Observation, Test Mode and Research Laboratory?</summary><p>Live Observation is intended for persistent real-table evidence, but public human entry is not implemented and the server rejects observed-origin sessions by default. Test Mode is a browser-memory sandbox for arbitrary sequences and expires after 24 hours. The Research Laboratory runs structured, seeded synthetic experiments and has a separate research-results workflow.</p></details>
+        <details data-searchable><summary>How does BRI remember the same table?</summary><p>Simulated table profiles persist separately from observation sessions, and authenticated accounts can retain an active table ID and model checkpoint. A table ID organizes records; it does not prove that a particular physical wheel was observed.</p></details>
+        <details data-searchable><summary>What happens when an observer leaves and returns?</summary><p>The current public application does not have a human observation workflow or observer identity/handover records. Table-profile persistence exists for the simulator, but the system cannot yet record whether physical spins occurred while a human observer was away.</p></details>
+        <details data-searchable><summary>How are missing spins handled?</summary><p>Explicit pause and missing-spin markers have not been implemented. Do not treat two separate human observation periods as one uninterrupted sequence; a future sequence-analysis workflow must record uncertain gaps rather than inventing outcomes or continuity.</p></details>
+        <details data-searchable><summary>Can I upload historical results?</summary><p>CSV or historical imports are not yet available through the public site. The research scripts can run structured synthetic experiments and validated in-memory sequences, but there is no import-preview, provenance-verification or large-file upload workflow.</p></details>
+        <details data-searchable><summary>How do I test unusual or repeated sequences?</summary><p>Use Test Mode to enter any valid number, create repetitions, correct recent test outcomes, or generate a short seeded sequence. Test results are not sent to the server and cannot become live observations or shared research.</p></details>
+        <details data-searchable><summary>What happens to Test Mode data?</summary><p>Test Mode keeps its session in page memory, applies a fixed 24-hour expiry that activity does not extend, and offers immediate discard. Navigating away or closing the page discards the session; it is not recoverable and is not included in server backups.</p></details>
+      </section>
+
+      <section class="knowledge-group" id="integrity" data-document-group aria-labelledby="integrityTitle">
+        <p class="research-kicker">06 / INTEGRITY AND PRIVACY</p>
+        <h2 id="integrityTitle">Provenance, corrections and trust</h2>
+        <details data-searchable><summary>How are false entries corrected?</summary><p>When server storage is configured, corrections are appended as revisions rather than overwriting the original outcome. Affected derived statistics are invalidated and must be rebuilt from the corrected effective history before forecasting resumes.</p></details>
+        <details data-searchable><summary>How are automated submissions detected?</summary><p>There is no verified live-human rate-limiting or anti-automation system in this release. Observed-origin session creation and outcome writes are disabled by default on the PHP server; do not enable them until cadence controls, provenance enforcement and database tests exist.</p></details>
+        <details data-searchable><summary>How does BRI prevent fabricated results from influencing research?</summary><p>The default-off observed-origin gate blocks those API writes by default, and synthetic simulation data is kept separate from observed data and shared observed aggregates. There is not yet a quarantine/moderation pipeline for suspicious human submissions because the public human-entry workflow is not implemented.</p></details>
+        <details data-searchable><summary>What is Collective Intelligence?</summary><p>The optional shared-aggregate endpoint returns anonymous street totals only for consented observed-origin records in an explicitly named cohort and matching table type. A cohort ID and table type are not proof that contributors watched the same physical wheel; there is no shared model training.</p></details>
+        <details data-searchable><summary>How is private information protected?</summary><p>Server APIs require bearer-token authentication and owner-scoped queries; token hashes, not raw tokens, are stored in the database. Shared aggregates return no per-player or per-table details, and Test Mode never sends its results to the server. A full production security audit has not been completed.</p></details>
+        <details data-searchable><summary>Can submitted text rewrite these answers?</summary><p>No. This FAQ is static authored HTML. Search only filters existing page text; user submissions, imported data and generated commentary cannot edit it or publish a new page.</p></details>
+      </section>
+
+      <section class="knowledge-group" id="evidence" data-document-group aria-labelledby="evidenceTitle">
+        <p class="research-kicker">07 / EVIDENCE AND FUTURE WORK</p>
+        <h2 id="evidenceTitle">What is known and what remains open</h2>
+        <details data-searchable><summary>What has Bank-Roll demonstrated so far?</summary><p>The project has tested payout accounting, seeded simulation reproducibility, forward-scored frequency models, bankroll constraints and synthetic research scenarios. These are software and simulation results, not demonstrations of predictive advantage on real roulette.</p></details>
+        <details data-searchable><summary>What remains unproven?</summary><p>No real-wheel bias, sequential dependence, profitable conditional street, or independently validated live prediction advantage has been established. Holdout model promotion, calibrated sequence tests, human observation safeguards and imports remain unfinished.</p></details>
+        <details data-searchable><summary>How can researchers reproduce experiments?</summary><p>The repository documents Node-based test and benchmark commands, deterministic seeds, scenario definitions and result files. Synthetic result JSON is retained in the development repository but is not published as public research evidence or served by the cPanel package.</p></details>
+        <details data-searchable><summary>Can BRI create new research pages?</summary><p>Not currently. Dynamic research-page generation, evidence-linked publishing proposals and an editorial approval workflow are planned concepts, not available capabilities. This FAQ and technical guide are authored static pages.</p></details>
+        <details data-searchable><summary>Why is evidence-protected publishing important?</summary><p>Many hypotheses and repeated comparisons can produce attractive patterns by chance. Public scientific or financial conclusions should cite eligible datasets, model versions, methods and independent evaluation; no automated publication pipeline is currently enabled.</p></details>
+        <details data-searchable><summary>Where can I learn more?</summary><p>Read the <a href="/docs">technical documentation</a> for implemented architecture and limitations, try <a href="test-mode.html">Test Mode</a> for disposable experimentation, or return to the <a href="index.html">laboratory</a>.</p></details>
+      </section>
+
+      <footer class="research-public-footer">
+        <span>Bank-Roll · Facts, estimates and hypotheses are labelled separately.</span>
+        <a href="index.html">Return to the laboratory</a>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="src/ui/documentation-search.js"></script>
+</body>
+</html>
