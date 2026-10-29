@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+/server/private/config.php
+/server/private/secrets*.php
+node_modules/
+dist/
+*.zip
+*.tar.gz

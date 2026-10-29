@@ -1,0 +1,11 @@
+{
+  "name": "bank-roll",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "test:php": "php tests/php/run.php",
+    "benchmark:autonomous": "node scripts/autonomous-benchmark.js",
+    "benchmark:street-intelligence": "node scripts/street-intelligence-benchmark.js"
+  }
+}

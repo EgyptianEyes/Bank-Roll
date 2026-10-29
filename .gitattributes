@@ -1,0 +1,5 @@
+index.html whitespace=cr-at-eol
+index-foundation.html whitespace=cr-at-eol,-blank-at-eol
+assets/css/bank-roll.css whitespace=cr-at-eol
+src/ui/app.js whitespace=cr-at-eol
+tests/fixtures/legacy-baseline.html whitespace=cr-at-eol,-blank-at-eol

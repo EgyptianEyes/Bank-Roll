@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="description" content="Bank-Roll is a European roulette research project. Explore the simulator, BRI's forecasting methods, mathematical baseline and research limitations." />
+<title>Bank-Roll — Winning Streets Research</title>
+<link rel="stylesheet" href="assets/css/bank-roll.css" />
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="title">
+      <div>
+        <h1>Bank-Roll</h1>
+        <div class="subtitle">European Roulette Simulation.</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-stacked" href="research.html" aria-label="Read Bank-Roll research and methodology">
+        <span class="btn-icon" aria-hidden="true">↗</span>
+        <span class="btn-text">Research</span>
+      </a>
+      <button class="btn btn-stacked" id="btnConfig">
+        <span class="btn-icon">⚙️</span>
+        <span class="btn-text">Config</span>
+      </button>
+      <button class="btn btn-stacked" id="btnSpeed">
+        <span class="btn-icon" id="speedLabel">1x</span>
+        <span class="btn-text">Speed</span>
+      </button>
+      <button class="btn btn-stacked" id="btnReset">
+        <span class="btn-icon">↻</span>
+        <span class="btn-text">Reset</span>
+      </button>
+      <button class="btn btn-stacked primary" id="btnRunStop">
+        <span class="btn-icon" id="runStopIcon">▶︎</span>
+        <span class="btn-text" id="runStopText">Run</span>
+      </button>
+    </div>
+
+  </header>
+
+    <div class="grid">
+    <!-- Configuration Overlay -->
+    <div class="config-overlay" id="configOverlay">
+      <div class="config-panel">
+        <div class="config-panel-header">
+          <h2>Configuration</h2>
+          <button class="close-btn" id="closeConfig">X</button>
+        </div>
+        <div class="config-panel-body">
+          <div class="form">
+
+            <div class="row">
+              <div class="field">
+                <label>Starting Bankroll (£)</label>
+                <input id="bankroll" type="number" value="100" min="1" step="1" />
+              </div>
+              <div class="field">
+                <label>Unit Stake (£)</label>
+                <input id="unit" type="number" value="0.20" min="0.01" step="0.01" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>Sessions to Run</label>
+                <input id="sessions" type="number" value="200" min="1" step="10" />
+              </div>
+              <div class="field">
+                <label>Max Spins per Session</label>
+                <input id="maxSpins" type="number" value="250" min="10" step="10" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="simulationMode">Live Simulation Mode</label>
+              <select id="simulationMode">
+                <option value="cold-street">Cold-street strategy (legacy)</option>
+                <option value="bri-autonomous">BRI Autonomous</option>
+              </select>
+              <div class="hint">BRI Autonomous lets BRI select street wagers; STOP suspends betting but keeps observing.</div>
+            </div>
+            <div class="field">
+              <label>Bet Strategy</label>
+              <select id="betType">
+                <option value="streets">Streets (3 numbers, 11:1)</option>
+                <option value="redblack">Red/Black (even money)</option>
+                <option value="dozens">Dozens (12 numbers, 2:1)</option>
+              </select>
+              <div class="hint">Street mode tracks "cold" streets for intelligent selection.</div>
+            </div>
+
+            <div class="row" id="streetControls">
+              <div class="field">
+                <label>Cold Threshold (spins)</label>
+                <input id="coldThreshold" type="number" value="22" min="0" step="1" />
+                <div class="hint">Minimum gap to consider a street "cold"</div>
+              </div>
+              <div class="field">
+                <label>Max Streets Bet</label>
+                <input id="maxStreets" type="number" value="2" min="1" max="3" step="1" />
+                <div class="hint">1-3 coldest streets covered</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>Progression System</label>
+                <select id="progression">
+                  <option value="flat">Flat (always 1 unit)</option>
+                  <option value="linear">Linear (+1 each loss)</option>
+                  <option value="martingale">Martingale (x2 each loss)</option>
+                  <option value="fibo">Fibonacci</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Max Progression Steps</label>
+                <input id="maxSteps" type="number" value="6" min="1" step="1" />
+                <div class="hint">Session ends when exceeded</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>Stop-Loss per Session (£)</label>
+                <input id="stopLoss" type="number" value="25" min="0" step="5" />
+                <div class="hint">0 to disable</div>
+              </div>
+
+              <div class="field">
+                <label>Take-Profit per Session (£)</label>
+                <input id="takeProfit" type="number" value="25" min="0" step="5" />
+                <div class="hint">0 to disable</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Simulation Seed</label>
+              <input id="seed" type="text" value="20260116" />
+              <div class="hint">Same seed = identical results (reproducibility)</div>
+            </div>
+
+            <div class="field">
+              <label for="briApiBase">BRI Research Storage</label>
+              <input id="briApiBase" type="url" placeholder="server/api/v1/" autocomplete="url" />
+              <input id="briToken" type="password" placeholder="Player access token" autocomplete="off" />
+              <div class="bri-check-row">
+                <input id="briEnabled" type="checkbox" />
+                <label for="briEnabled">Save outcomes and forecasts to server memory</label>
+              </div>
+              <div class="bri-check-row">
+                <input id="briShare" type="checkbox" />
+                <label for="briShare">Contribute this session to shared research</label>
+              </div>
+              <button class="preset-btn" id="btnBriConnect" type="button">Check connection</button>
+              <div class="hint" id="briConnectionStatus" role="status">Disconnected · Research remains local</div>
+              <button class="preset-btn" id="btnFalseEntryChallenge" type="button">Run False Entry Challenge</button>
+              <div class="hint" id="falseEntryChallengeStatus" role="status">No challenge run recorded</div>
+              <button class="preset-btn" id="btnLoadIntegrityHistory" type="button">Load recent recorded spins</button>
+              <label for="briCorrectionEvent">Review a recorded result</label>
+              <select id="briCorrectionEvent" aria-label="Recorded spin to review">
+                <option value="">Load recent spins first</option>
+              </select>
+              <input id="briCorrectedOutcome" type="number" min="0" max="36" step="1" placeholder="Corrected result (0-36)" />
+              <input id="briCorrectionReason" type="text" maxlength="300" placeholder="Correction reason (optional)" />
+              <button class="preset-btn" id="btnSubmitCorrection" type="button">Record correction</button>
+              <div class="hint" id="briCorrectionStatus" role="status">Original events are never overwritten</div>
+              <label for="companionMode">BRI companion</label>
+              <select id="companionMode" aria-label="Companion commentary mode">
+                <option value="quiet">Quiet · no commentary</option>
+                <option value="companion" selected>Companion · key moments</option>
+                <option value="full">Full character · every call</option>
+              </select>
+              <div class="bri-check-row">
+                <input id="companionVoice" type="checkbox" />
+                <label for="companionVoice">Speak commentary aloud (muted by default)</label>
+              </div>
+              <div class="hint">The player token remains in this browser tab. Sharing requires player and session consent plus an agreed cohort UUID and matching table type. Only observed results are aggregated; this simulator's synthetic runs are excluded.</div>
+            </div>
+
+            <div class="presets">
+              <button class="preset-btn" id="btnPresetConservative">Conservative</button>
+              <button class="preset-btn" id="btnPresetBalanced">Balanced</button>
+              <button class="preset-btn" id="btnPresetAggressive">Aggressive</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="widgets-container">
+
+      <!-- Performance Widget -->
+      <div class="widget" id="widget-performance" draggable="true">
+        <div class="widget-header" draggable="true">
+          <h3>Live Performance</h3>
+          <span class="pill" id="pillStatus">Ready</span>
+        </div>
+        <div class="widget-body">
+          <div class="performance" id="livePerformance">
+            <div class="wheel-display">
+              <div class="roulette-wheel" id="rouletteWheel">
+                <div class="wheel-graphic" aria-hidden="true"></div>
+                <div class="wheel-ball" aria-hidden="true"></div>
+                <div class="wheel-number" id="wheelNumber"></div>
+              </div>
+              <div class="session-info">
+                <div class="info-row">
+                  <span class="info-label">Session</span>
+                  <span class="info-value" id="liveSession">-</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Spin</span>
+                  <span class="info-value" id="liveSpin">-</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Bankroll</span>
+                  <span class="info-value" id="liveBankroll">-</span>
+                </div>
+              </div>
+            </div>
+            <div class="street-board">
+              <div class="street-board-label">Streets</div>
+              <div class="roulette-table" id="streetGrid"></div>
+            </div>
+            <section class="prediction-monitor" aria-live="polite" aria-label="Winning Streets prediction monitor">
+              <div class="prediction-heading">
+                <span>Winning Streets</span>
+                <span id="predictionMaturity">Maturity 0%</span>
+              </div>
+              <div class="prediction-metrics">
+                <span>Latest forecast: <strong id="predictionPick">Gathering observations</strong></span>
+                <span>Model estimate: <strong id="predictionEstimate">-</strong></span>
+                <span>Model: <strong id="predictionModel">Uniform baseline</strong></span>
+                <span>Accuracy: <strong id="predictionAccuracy">0 / 0</strong></span>
+                <span>One-street baseline: <strong id="predictionBaseline">8.1%</strong></span>
+                <span>Data integrity: <strong id="integrityStatus">Building baseline</strong></span>
+                <span>BRI decision: <strong id="briDecisionStatus">-</strong></span>
+              </div>
+              <p class="companion-message" id="companionMessage">Still gathering numbers. I'm watching.</p>
+            </section>
+            <div class="live-stat-row">
+              <div class="live-stat">
+                <span class="label">Session P/L</span>
+                <span class="value" id="liveSessionPL">-</span>
+              </div>
+              <div class="live-stat">
+                <span class="label">Total P/L</span>
+                <span class="value" id="livePL">-</span>
+              </div>
+              <div class="live-stat">
+                <span class="label">Win Rate</span>
+                <span class="value" id="liveWinRate">-</span>
+              </div>
+            </div>
+            <div class="mini-chart">
+              <canvas id="miniChart" width="1200" height="120"></canvas>
+            </div>
+          </div>
+          <div class="widget-resize"></div>
+        </div>
+      </div>
+
+      <!-- KPIs Widget -->
+      <div class="widget" id="widget-kpis" draggable="true">
+        <div class="widget-header" draggable="true">
+          <h3>Key Metrics</h3>
+        </div>
+        <div class="widget-body">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="label">Total P/L</div>
+              <div class="value" id="kpiTotalPL">-</div>
+              <div class="sub" id="kpiTotalPLSub">-</div>
+              <div class="kpi-help">Your total profit or loss across all sessions</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Avg Final</div>
+              <div class="value" id="kpiAvgFinal">-</div>
+              <div class="sub" id="kpiMedianFinal">-</div>
+              <div class="kpi-help">Average bankroll at session end</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Win Rate</div>
+              <div class="value" id="kpiWinRate">-</div>
+              <div class="sub" id="kpiWins">-</div>
+              <div class="kpi-help">% of sessions ending above starting bankroll</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Range</div>
+              <div class="value" id="kpiWorstBest">-</div>
+              <div class="sub" id="kpiStdDev">-</div>
+              <div class="kpi-help">Your worst to best session results</div>
+            </div>
+          </div>
+          <div class="widget-resize"></div>
+        </div>
+      </div>
+
+      <!-- Charts Widget -->
+      <div class="widget" id="widget-charts" draggable="true">
+        <div class="widget-header" draggable="true">
+          <h3>Analytics</h3>
+        </div>
+        <div class="widget-body">
+          <div class="charts">
+            <div class="chart-container">
+              <div class="chart-label">Session Progression</div>
+              <canvas id="chartLine" width="900" height="360"></canvas>
+              <div class="chart-description">
+                Shows your bankroll at the end of each session. The green line is your starting amount (A100).
+                Points above = profit, below = loss.
+              </div>
+            </div>
+            <div class="chart-container">
+              <div class="chart-label">Final Distribution</div>
+              <canvas id="chartHist" width="900" height="360"></canvas>
+              <div class="chart-description">
+                How often you end up with each amount. Taller bars = more common outcomes.
+                Shows if results cluster around your starting bankroll or spread wide.
+              </div>
+            </div>
+          </div>
+          <div class="widget-resize"></div>
+        </div>
+      </div>
+
+      <!-- Results Widget -->
+      <div class="widget" id="widget-results" draggable="true">
+        <div class="widget-header" draggable="true">
+          <h3>Results</h3>
+        </div>
+        <div class="widget-body">
+          <div class="statusline">
+            <div class="progressbar" aria-label="progress">
+              <div id="progressFill"></div>
+            </div>
+            <div id="statusText">Ready to simulate</div>
+          </div>
+
+          <div class="tablewrap">
+            <div class="scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:80px">#</th>
+                    <th style="width:120px">Final (£)</th>
+                    <th style="width:120px">P/L (£)</th>
+                    <th style="width:100px">Spins</th>
+                    <th>Outcome</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody">
+                  <tr>
+                    <td colspan="5">
+                      <div class="empty-state">
+                        <div class="empty-state-icon">*</div>
+                        <div>Run a simulation to see detailed results</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;text-align:center">
+            <button class="btn" id="btnExportCsv" disabled style="min-width:200px">
+              Export Results (CSV)
+            </button>
+          </div>
+          <div class="widget-resize"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <section class="research-intelligence" id="researchIntelligence" aria-labelledby="researchTitle">
+      <div class="research-active-table">
+        <div>
+          <p class="research-kicker">ACTIVE TABLE · SIMULATION</p>
+          <strong id="researchTableName">Loading table profile</strong>
+          <p id="researchTableContinuity">Table identity persists across simulation sessions. Each run creates a separate session under this table.</p>
+        </div>
+        <button class="btn" id="btnSwitchResearchTable" type="button">Switch Table</button>
+      </div>
+      <header class="research-header">
+        <div>
+          <p class="research-kicker">BANK-ROLL INTELLIGENCE · LIVE RESEARCH</p>
+          <h2 id="researchTitle">A living record</h2>
+        </div>
+        <div class="research-live-state" id="researchStatus" data-research-field="status" role="status" aria-live="polite">Idle · no observations yet</div>
+      </header>
+
+      <div class="research-overview">
+        <div class="research-stat">
+          <span>Observations</span>
+          <strong id="researchObserved" data-research-field="observed">0</strong>
+        </div>
+        <div class="research-stat">
+          <span>Observation maturity</span>
+          <strong id="researchMaturity" data-research-field="maturity">0 / 100</strong>
+        </div>
+        <div class="research-stat">
+          <span>Dataset provenance</span>
+          <strong id="researchProvenance" data-research-field="provenance">No dataset</strong>
+        </div>
+        <div class="research-stat">
+          <span>Last update</span>
+          <strong id="researchLastUpdate" data-research-field="lastUpdate">Not yet updated</strong>
+        </div>
+      </div>
+      <div class="research-maturity-track" id="researchMaturityTrack" role="progressbar" aria-label="Observation maturity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="researchMaturityFill"></span></div>
+      <p class="research-explanation" id="researchExplanation" data-research-field="explanation">No observations are loaded. Observation maturity is not a measure of predictive confidence.</p>
+
+      <div class="research-layout">
+        <section class="research-block" aria-labelledby="streetProfilesTitle">
+          <div class="research-block-heading">
+            <div>
+              <h3 id="streetProfilesTitle">Twelve streets</h3>
+              <p>Current dataset · descriptive counts against the European baseline</p>
+            </div>
+            <span id="researchForecastCaption" data-research-field="forecastCaption">Forecast comparison unavailable</span>
+          </div>
+          <div class="research-table-wrap">
+            <table class="research-table">
+              <thead>
+                <tr>
+                  <th scope="col">Street</th>
+                  <th scope="col">Observed / expected</th>
+                  <th scope="col">Last 100</th>
+                  <th scope="col">Current gap</th>
+                  <th scope="col">Last scored forecast</th>
+                </tr>
+              </thead>
+              <tbody id="researchStreetRows"></tbody>
+            </table>
+          </div>
+          <p class="research-footnote">A difference from expectation is descriptive, not evidence that a wheel is biased. Zero is tracked separately from all twelve streets.</p>
+        </section>
+
+        <aside class="research-aside">
+          <section class="research-block" aria-labelledby="numberFrequenciesTitle">
+            <div class="research-block-heading">
+              <div>
+                <h3 id="numberFrequenciesTitle">Number frequency</h3>
+                <p id="researchNumberCaption" data-research-field="numberCaption">No recent outcomes</p>
+              </div>
+            </div>
+            <div class="research-number-grid" id="researchNumberCounts" aria-label="Number appearances in the recent observation window"></div>
+          </section>
+
+          <section class="research-block" aria-labelledby="modelStateTitle">
+            <h3 id="modelStateTitle">Forecast evidence</h3>
+            <ul class="research-model-list" id="researchModelScores"></ul>
+            <p class="research-footnote" id="researchEvidence" data-research-field="evidence">No forward-scored model comparison yet. Calibration is not currently estimated.</p>
+            <p class="research-footnote" id="researchStrategyState" data-research-field="strategy">No autonomous strategy decision was recorded for this observation.</p>
+          </section>
+
+          <section class="research-block" aria-labelledby="hypothesisTitle">
+            <h3 id="hypothesisTitle">Open questions</h3>
+            <p id="researchHypothesisState">A persistent hypothesis archive is not yet implemented.</p>
+          </section>
+        </aside>
+      </div>
+
+      <section class="research-timeline-block" aria-labelledby="researchTimelineTitle">
+        <div class="research-block-heading">
+          <div>
+            <h3 id="researchTimelineTitle">Research timeline</h3>
+            <p>Significant events from this browser dataset; ordinary spins are not listed individually.</p>
+          </div>
+          <span id="researchTimelineCount" data-research-field="timelineCount">0 events</span>
+        </div>
+        <ol class="research-timeline" id="researchTimeline">
+          <li class="research-timeline-empty">Milestones and meaningful state changes will appear here as they occur.</li>
+        </ol>
+      </section>
+    </section>
+
+    <dialog class="table-switch-dialog" id="tableSwitchDialog" aria-labelledby="tableSwitchTitle">
+      <form id="tableSwitchForm">
+        <h2 id="tableSwitchTitle">Switch research table</h2>
+        <p>Previous table observations, predictions and research are retained. Table history is not deleted or combined when you switch.</p>
+        <label for="tableSwitchTarget">Choose a saved table or create a new one</label>
+        <select id="tableSwitchTarget">
+          <option value="__new__">Create a new simulated table</option>
+        </select>
+        <div id="tableSwitchNewFields">
+          <label for="tableSwitchName">New table name</label>
+          <input id="tableSwitchName" type="text" maxlength="120" required />
+          <label for="tableSwitchCohort">Shared cohort UUID (optional)</label>
+          <input id="tableSwitchCohort" type="text" placeholder="Only for an agreed observed-data cohort" />
+        </div>
+        <p class="table-switch-mode">Mode: simulated outcomes. Human live observation and historical entry are not available yet.</p>
+        <p id="tableSwitchStatus" role="status" aria-live="polite"></p>
+        <div class="table-switch-actions">
+          <button class="btn" id="btnCancelTableSwitch" type="button">Cancel</button>
+          <button class="btn primary" id="btnConfirmTableSwitch" type="submit">Confirm switch</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+</div>
+
+<script type="module" src="src/ui/app.js"></script>
+</body>
+</html>

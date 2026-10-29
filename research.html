@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="How Bank-Roll investigates European roulette, BRI's forecasting methods, the mathematics of street betting and the limits of current evidence." />
+  <meta property="og:title" content="Bank-Roll | Research and Method" />
+  <meta property="og:description" content="A transparent guide to Bank-Roll's European roulette simulator, BRI models, mathematics and research limitations." />
+  <link rel="canonical" href="https://bank-roll.uk/research.html" />
+  <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <title>Research and Method | Bank-Roll</title>
+</head>
+<body class="research-document">
+  <div class="research-document-shell">
+    <header class="research-public-header">
+      <a class="research-brand" href="index.html">
+        <strong>Bank-Roll</strong>
+        <span>WINNING STREETS · RESEARCH</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Laboratory</a>
+        <a href="#method">Method</a>
+        <a href="#limits">Limitations</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="research-public-hero" aria-labelledby="pageTitle">
+        <p class="research-kicker">EUROPEAN ROULETTE · COMPUTATIONAL RESEARCH</p>
+        <h1 id="pageTitle">Winning Streets.</h1>
+        <p class="research-public-lede">Bank-Roll is a research project investigating roulette street strategies, probability and whether recorded outcomes can support better forecasts. BRI, the Bank-Roll Intelligence layer, tests ideas against a uniform European-wheel baseline and keeps uncertainty visible.</p>
+        <a class="research-primary-link" href="index.html">Open the laboratory <span aria-hidden="true">→</span></a>
+        <div class="research-public-facts" aria-label="Research principles">
+          <div><strong>37</strong><span>European outcomes</span></div>
+          <div><strong>12</strong><span>number streets</span></div>
+          <div><strong>0</strong><span>verified live-wheel advantages</span></div>
+        </div>
+      </section>
+
+      <section class="research-public-section" id="project" aria-labelledby="projectTitle">
+        <div class="research-section-index">01 / PROJECT</div>
+        <div class="research-section-body">
+          <h2 id="projectTitle">A testable investigation</h2>
+          <p>Bank-Roll began as a European roulette simulator and is developing into a transparent computational research platform. Its current laboratory compares conventional street strategies with exploratory forecasting models. Simulations are reproducible by seed and useful for testing software and hypotheses; they are not observations of a physical wheel.</p>
+          <p>BRI records forecasts before outcomes in the simulation pipeline, evaluates them after the outcome, and reports performance against the theoretical baseline. Statistical irregularities are candidates for further investigation, not proof of error or a promise of profit.</p>
+        </div>
+      </section>
+
+      <section class="research-public-section" id="mathematics" aria-labelledby="mathTitle">
+        <div class="research-section-index">02 / MATHEMATICS</div>
+        <div class="research-section-body">
+          <h2 id="mathTitle">The European baseline</h2>
+          <p>A single-zero European wheel has 37 equally likely outcomes under the ideal model: numbers 1 through 36 and zero. Each street contains three numbers.</p>
+          <div class="research-equation-list">
+            <div><span>One street wins</span><strong>3 / 37 ≈ 8.1081%</strong></div>
+            <div><span>Zero occurs</span><strong>1 / 37 ≈ 2.7027%</strong></div>
+            <div><span>Street wager, net expectation per unit</span><strong>12p − 1</strong></div>
+            <div><span>Break-even street probability</span><strong>1 / 12 ≈ 8.3333%</strong></div>
+            <div><span>Fair-wheel expected net per unit</span><strong>−1 / 37 ≈ −2.7027%</strong></div>
+          </div>
+          <p>A winning street pays 11 units net and returns the original stake, for 12 units gross. Zero loses a street stake. A short run of wins or a high historical frequency does not establish that the next spin has a higher probability.</p>
+        </div>
+      </section>
+
+      <section class="research-public-section" id="method" aria-labelledby="methodTitle">
+        <div class="research-section-index">03 / METHOD</div>
+        <div class="research-section-body">
+          <h2 id="methodTitle">How BRI evaluates forecasts</h2>
+          <ol class="research-method-list">
+            <li><strong>Observe.</strong> The simulator records a synthetic European outcome and updates incremental street statistics.</li>
+            <li><strong>Forecast.</strong> After ten outcomes, BRI can issue a forecast for the next spin using uniform, rolling-frequency and exponentially weighted models.</li>
+            <li><strong>Score.</strong> The forecast is evaluated only after its outcome. Candidate distributions are compared with a 13-category Brier score, including zero.</li>
+            <li><strong>Compare.</strong> Evidence-gated decisions use forward-scored comparisons against the uniform baseline. A better score is not itself proof of a profitable wager.</li>
+            <li><strong>Disclose.</strong> Seeded synthetic experiments, financial simulations and observed evidence are different data classes and must not be presented as interchangeable.</li>
+          </ol>
+          <p>The simulator's seeded generator is deterministic and intended for reproducible experiments, not cryptographic security. The current model family is fixed; independent holdout validation and sequence-dependence tests remain future work.</p>
+        </div>
+      </section>
+
+      <section class="research-public-section" id="limits" aria-labelledby="limitsTitle">
+        <div class="research-section-index">04 / LIMITS</div>
+        <div class="research-section-body">
+          <h2 id="limitsTitle">What this version does not claim</h2>
+          <ul class="research-limit-list">
+            <li>No evidence in this release establishes that a physical or commercial roulette system is biased or predictable.</li>
+            <li>Synthetic bias experiments show how models behave under specified assumptions; they do not establish that those assumptions occur in real play.</li>
+            <li>Observation maturity describes sample size, not predictive confidence. A candidate anomaly is not a verified incorrect entry.</li>
+            <li>There is no public human live-observation or historical import workflow in this release. The server rejects observed-origin submissions by default until live safeguards are verified.</li>
+            <li>Table IDs and shared-cohort IDs organize datasets; they do not independently verify physical-wheel identity, human observation, or uninterrupted sequence continuity.</li>
+            <li>Roulette has a house edge under the fair-wheel model. No strategy, progression or model guarantees profit; use the simulator for research, not financial advice.</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer class="research-public-footer">
+        <span>Bank-Roll · Research, not a promise of profit.</span>
+        <a href="index.html">Return to the laboratory</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
