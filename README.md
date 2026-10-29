@@ -19,6 +19,8 @@ php tests/php/run.php
 
 See [architecture](docs/architecture.md), [mathematics](docs/mathematics.md), [development](docs/development.md), and [server API](docs/server-api.md).
 
+Release status and the deployable cPanel package are documented in the [v1.0.0 release report](BANK-ROLL-RELEASE-REPORT.md).
+
 ## Current scope
 
 The existing interface and roulette board are retained. Live runs offer the original cold-street strategy as the default and a separate BRI Autonomous mode. Autonomous decisions drive the actual street wagers; STOP suspends wagers while the session continues observing. Every proposed wager is independently checked by bankroll accounting, and configured session stop-loss/take-profit limits still apply. The mode uses the central BRI coordinator and the CONTINUE/SWITCH/SPREAD/STOP decision engine with exact exposure projections. When server storage is enabled, forecasts and full decision snapshots are recorded before outcomes and replayed in order from the bounded offline outbox. The prediction model is exploratory and its measured accuracy is reported against the uniform European baseline; it does not establish a betting advantage, and the companion can never influence the mathematics.

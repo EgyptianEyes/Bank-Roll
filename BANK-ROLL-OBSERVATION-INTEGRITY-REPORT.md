@@ -80,4 +80,4 @@ This phase adds no cookie-based state-changing endpoint, admin capability, rate 
 5. Add historical-entry and chunked import modes with explicit provenance and retrospective/holdout labels; do not apply live cadence limits to research workloads.
 6. Run migration/API tests against disposable MySQL/MariaDB and test concurrent active-table updates before claiming persistence verification.
 
-At the end of the original Phase 1 implementation, no commit, push, deployment, external search, or ZIP creation had been performed. The current release commit and deployment status are documented in `BANK-ROLL-RELEASE-REPORT.md`.
+The original Phase 1 changes are included in source commit `d3e5b5b6e203b9d1cdd9170b3e4de8be70646426`, pushed to `origin/main`. Production deployment remains pending the verified cPanel destination, permissions, backup and database procedure. See `BANK-ROLL-RELEASE-REPORT.md`.
