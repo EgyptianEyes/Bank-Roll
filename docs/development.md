@@ -43,6 +43,10 @@ find server tests/php -name '*.php' -print0 | xargs -0 -n1 php -l
 
 The PHP unit script covers request validation, data provenance, UUID/outcome categories and Brier scoring without a database.
 
+## cPanel source package
+
+Run `bash scripts/package-cpanel.sh` from any directory. It packages the current working tree's browser runtime (including uncommitted file contents) into `bank-roll-cpanel.zip`, with one `public_html/` root, safe file/directory permissions, local-page tests, module dependency validation and ZIP integrity checking. PHP backend files, migrations, tests, reports and synthetic datasets are deliberately excluded because database-backed production requirements are not verified for the initial browser-only release. The GitHub Actions `Package cPanel website` workflow can be started manually with `workflow_dispatch`; it produces the same ZIP as a downloadable artifact and has read-only repository permission. Neither packaging method commits, pushes or deploys.
+
 ## Database integration tests
 
 `tests/integration/server-db.test.js` verifies the migrations and the full API — registration gating, active-table ownership/selection, session idempotency, forecast/decision-before-outcome ordering, durable decision readback and replay handling, conflict/replay handling, successive correction chains, rebuild idempotency and interrupted-rebuild retry, model checkpoint reconstruction/upload and consent-gated shared aggregates — against a real MySQL/MariaDB server through the PHP built-in web server. It drops and recreates every table in the configured test database, so point it at a disposable database only:

@@ -1,0 +1,30 @@
+name: Package cPanel website
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out selected revision
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Build and verify cPanel ZIP
+        run: bash scripts/package-cpanel.sh "$RUNNER_TEMP/bank-roll-cpanel.zip"
+
+      - name: Upload downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bank-roll-cpanel
+          path: ${{ runner.temp }}/bank-roll-cpanel.zip
+          if-no-files-found: error
+          retention-days: 14

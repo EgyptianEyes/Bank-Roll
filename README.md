@@ -25,6 +25,10 @@ Public knowledge pages: [FAQ](/faq) and [technical documentation](/docs). These 
 
 Release status and the deployable cPanel package are documented in the [v1.0.0 release report](BANK-ROLL-RELEASE-REPORT.md).
 
+## cPanel ZIP Packaging
+
+Create a browser-only `bank-roll-cpanel.zip` from the current working tree, including uncommitted changes, with `bash scripts/package-cpanel.sh`. The archive contains exactly one top-level `public_html/` directory and is intended to be extracted into the cPanel account home directory. It includes the static simulator, FAQ, docs, Test Mode, CSS, ES modules and Workers; it excludes PHP/MySQL APIs and migrations because database-backed features have not been verified for production. Observed submissions remain disabled. The script runs the page/module checks and archive verifier. The same package can be built manually from GitHub Actions using the `Package cPanel website` workflow (`workflow_dispatch`); it uploads an artifact only and does not publish or deploy.
+
 ## Current scope
 
 The existing interface and roulette board are retained. Live runs offer the original cold-street strategy as the default and a separate BRI Autonomous mode. Autonomous decisions drive the actual street wagers; STOP suspends wagers while the session continues observing. Every proposed wager is independently checked by bankroll accounting, and configured session stop-loss/take-profit limits still apply. The mode uses the central BRI coordinator and the CONTINUE/SWITCH/SPREAD/STOP decision engine with exact exposure projections. When server storage is enabled, forecasts and full decision snapshots are recorded before outcomes and replayed in order from the bounded offline outbox. The prediction model is exploratory and its measured accuracy is reported against the uniform European baseline; it does not establish a betting advantage, and the companion can never influence the mathematics.
