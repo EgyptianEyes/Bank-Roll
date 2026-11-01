@@ -5,5 +5,7 @@
 /server/private/secrets*.php
 node_modules/
 dist/
+test-results/
+playwright-report/
 *.zip
 *.tar.gz

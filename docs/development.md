@@ -45,6 +45,24 @@ The PHP unit script covers request validation, data provenance, UUID/outcome cat
 
 ## cPanel source package
 
+### Player/browser verification
+
+Install declared development dependencies with `npm ci`. For a new browser-test host, run `npx playwright install --with-deps chromium`, then `npm run test:browser`. The runner owns a loopback-only test server on port 4178 and stops it when finished. Chromium persistent-context tests verify a real browser-process restart, not just a reload. Mobile checks cover 320, 375, 390, 430 and 768 portrait widths and corresponding rotated viewports, all public pages, 44px Player keypad targets, actual wagers, undo/correction, export, session/table separation and Worker execution.
+
+The Node tests additionally use fake IndexedDB for atomic revision conflicts, storage failure/retry, historical-session correction, cadence quarantine and all 37 multi-street settlements. No Node production service or browser testing dependency is included in the package.
+
+Reproduce the final fixed-policy confirmation study:
+
+```sh
+node scripts/player-evidence-benchmark.js \
+  --seed-prefix=next-stage-final-check-v2 \
+  --output=research-results/next-stage-confirmation.json
+```
+
+This runs 20 seeds per fair/biased/changing scenario, 2,000 outcomes per seed and seven fixed strategies, including an independent random-street flat control. Diagnostic runs preceded the final fresh seeds. Seed partitions are labelled before execution, but no external blinded wheel validation or learned model promotion is claimed. Unadjusted replicate t intervals and total exposure are reported; profit alone does not establish strategy superiority.
+
+The package's content-derived build key versions root scripts, transitive imports and Workers. `build-info.json` inventories every packaged file with SHA-256. Repeated identical public content has the same build ID; ZIP timestamps are not normalized because stale HTML validators must not be preserved across changed builds. To test the staged artifact rather than source, extract it into a temporary directory and set `BANKROLL_BROWSER_ROOT=/absolute/path/public_html` when running the browser suite.
+
 Run `bash scripts/package-cpanel.sh` from any directory. It packages the current working tree's browser runtime (including uncommitted file contents) into `bank-roll-cpanel.zip`, with one `public_html/` root, safe file/directory permissions, local-page tests, module dependency validation and ZIP integrity checking. PHP backend files, migrations, tests, reports and synthetic datasets are deliberately excluded because database-backed production requirements are not verified for the initial browser-only release. The GitHub Actions `Package cPanel website` workflow can be started manually with `workflow_dispatch`; it produces the same ZIP as a downloadable artifact and has read-only repository permission. Neither packaging method commits, pushes or deploys.
 
 ## Database integration tests

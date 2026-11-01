@@ -1,3 +1,4 @@
+import {createUuid} from "../../core/identifiers.js";
 import {mulberry32, xfnv1a} from "../../core/random.js";
 import {inspectCorrectionHistory, inspectObservationSequence, scoreIntegrityDetections} from "./integrity-monitor.js";
 
@@ -25,7 +26,7 @@ function runCase(name, makeCorruption, code, randomSalt, sourceIndex = 10){
   return {name, expected: name, targetId, detected, latency, issues: detection.issues};
 }
 
-export function runFalseEntryChallenge({seed = globalThis.crypto.randomUUID()} = {}){
+export function runFalseEntryChallenge({seed = createUuid()} = {}){
   const verifiableCases = [
     runCase("invalid-outcome", (events) => { events[10].outcome = 37; events[10].challengeError = "invalid-outcome"; return events; }, "invalid_outcome", `${seed}-a`),
     runCase("nonnumeric-outcome", (events) => { events[10].outcome = "23"; events[10].challengeError = "nonnumeric-outcome"; return events; }, "invalid_outcome", `${seed}-h`),

@@ -1,5 +1,6 @@
 import {mulberry32, xfnv1a} from "../core/random.js";
-import {getWheelPosition, isRed, WHEEL_ORDER} from "../core/roulette.js";
+import {createUuid} from "../core/identifiers.js";
+import {getWheelPosition, isRed, streetOf, WHEEL_ORDER} from "../core/roulette.js";
 import {StreetPredictionEngine} from "../intelligence/prediction-engine.js";
 import {LiveSessionEngine} from "../simulation/live-engine.js";
 import {AutonomousSessionEngine} from "../simulation/autonomous-session-engine.js";
@@ -270,7 +271,7 @@ let explicitLocalTableSelection = false;
 let observationsSinceLocalCheckpoint = 0;
 
 function newResearchId(){
-  return crypto.randomUUID();
+  return createUuid();
 }
 
 function readTableResearchMemory(){
@@ -1296,14 +1297,14 @@ try {
   const savedChallenges = JSON.parse(localStorage.getItem(INTEGRITY_CHALLENGE_KEY) || "[]");
   const lastChallenge = savedChallenges.at(-1);
   if (lastChallenge){
-    ui.falseEntryChallengeStatus.textContent = `Last run · TP ${lastChallenge.metrics.truePositives} · FP ${lastChallenge.metrics.falsePositives} · TN ${lastChallenge.metrics.trueNegatives} · FN ${lastChallenge.metrics.falseNegatives} · P ${(lastChallenge.metrics.precision * 100).toFixed(0)}% · R ${(lastChallenge.metrics.recall * 100).toFixed(0)}% · FPR ${(lastChallenge.metrics.falsePositiveRate * 100).toFixed(1)}%`;
+    predictionUI.falseEntryChallengeStatus.textContent = `Last run · TP ${lastChallenge.metrics.truePositives} · FP ${lastChallenge.metrics.falsePositives} · TN ${lastChallenge.metrics.trueNegatives} · FN ${lastChallenge.metrics.falseNegatives} · P ${(lastChallenge.metrics.precision * 100).toFixed(0)}% · R ${(lastChallenge.metrics.recall * 100).toFixed(0)}% · FPR ${(lastChallenge.metrics.falsePositiveRate * 100).toFixed(1)}%`;
   }
 } catch {
-  ui.falseEntryChallengeStatus.textContent = "Challenge history unavailable";
+  predictionUI.falseEntryChallengeStatus.textContent = "Challenge history unavailable";
 }
-ui.btnFalseEntryChallenge.addEventListener("click", async () => {
-  ui.btnFalseEntryChallenge.disabled = true;
-  ui.falseEntryChallengeStatus.textContent = "Running isolated synthetic challenge...";
+predictionUI.btnFalseEntryChallenge.addEventListener("click", async () => {
+  predictionUI.btnFalseEntryChallenge.disabled = true;
+  predictionUI.falseEntryChallengeStatus.textContent = "Running isolated synthetic challenge...";
   try {
     const benchmarkSeed = newResearchId();
     const benchmark = runFalseEntryChallenge({seed: benchmarkSeed});
@@ -1322,23 +1323,23 @@ ui.btnFalseEntryChallenge.addEventListener("click", async () => {
     const history = JSON.parse(localStorage.getItem(INTEGRITY_CHALLENGE_KEY) || "[]");
     history.push(report);
     localStorage.setItem(INTEGRITY_CHALLENGE_KEY, JSON.stringify(history.slice(-20)));
-    ui.falseEntryChallengeStatus.textContent = `TP ${report.metrics.truePositives} · FP ${report.metrics.falsePositives} · TN ${report.metrics.trueNegatives} · FN ${report.metrics.falseNegatives} · P ${(report.metrics.precision * 100).toFixed(0)}% · R ${(report.metrics.recall * 100).toFixed(0)}% · FPR ${(report.metrics.falsePositiveRate * 100).toFixed(1)}%`;
+    predictionUI.falseEntryChallengeStatus.textContent = `TP ${report.metrics.truePositives} · FP ${report.metrics.falsePositives} · TN ${report.metrics.trueNegatives} · FN ${report.metrics.falseNegatives} · P ${(report.metrics.precision * 100).toFixed(0)}% · R ${(report.metrics.recall * 100).toFixed(0)}% · FPR ${(report.metrics.falsePositiveRate * 100).toFixed(1)}%`;
 
     if (ui.briEnabled.checked){
       const client = createConfiguredResearchClient();
       await client.recordIntegrityChallenge(report);
-      ui.falseEntryChallengeStatus.textContent += " · saved to server (synthetic, unverified)";
+      predictionUI.falseEntryChallengeStatus.textContent += " · saved to server (synthetic, unverified)";
     } else {
-      ui.falseEntryChallengeStatus.textContent += " · saved locally";
+      predictionUI.falseEntryChallengeStatus.textContent += " · saved locally";
     }
   } catch (error) {
-    ui.falseEntryChallengeStatus.textContent = `Challenge failed · ${error.message}`;
+    predictionUI.falseEntryChallengeStatus.textContent = `Challenge failed · ${error.message}`;
   } finally {
-    ui.btnFalseEntryChallenge.disabled = false;
+    predictionUI.btnFalseEntryChallenge.disabled = false;
   }
 });
-ui.btnLoadIntegrityHistory.addEventListener("click", async () => {
-  ui.correctionStatus.textContent = "Loading recent recorded spins...";
+predictionUI.btnLoadIntegrityHistory.addEventListener("click", async () => {
+  predictionUI.correctionStatus.textContent = "Loading recent recorded spins...";
   try {
     const savedSession = JSON.parse(localStorage.getItem(BRI_CURRENT_SESSION_KEY) || "null");
     if (!savedSession?.sessionId) throw new Error("Run a server-backed session before reviewing recorded results.");
@@ -1355,31 +1356,31 @@ ui.btnLoadIntegrityHistory.addEventListener("click", async () => {
       const corrected = event.correction_revision ? ` · corrected r${event.correction_revision}` : "";
       return new Option(`Spin ${event.spin_number} · recorded ${event.original_outcome}${corrected} · ${event.event_id.slice(-8)}`, event.event_id);
     });
-    ui.correctionEvent.replaceChildren(placeholder, ...options);
-    ui.correctionStatus.textContent = `${events.length} recent event${events.length === 1 ? "" : "s"} loaded · Originals retained`;
+    predictionUI.correctionEvent.replaceChildren(placeholder, ...options);
+    predictionUI.correctionStatus.textContent = `${events.length} recent event${events.length === 1 ? "" : "s"} loaded · Originals retained`;
   } catch (error) {
-    ui.correctionStatus.textContent = `Unable to load history · ${error.message}`;
+    predictionUI.correctionStatus.textContent = `Unable to load history · ${error.message}`;
   }
 });
-ui.correctionEvent.addEventListener("change", () => {
-  const event = correctionEvents.get(ui.correctionEvent.value);
-  ui.correctedOutcome.value = "";
-  if (event) ui.correctedOutcome.placeholder = `Current value ${event.effective_outcome} · corrected result 0-36`;
+predictionUI.correctionEvent.addEventListener("change", () => {
+  const event = correctionEvents.get(predictionUI.correctionEvent.value);
+  predictionUI.correctedOutcome.value = "";
+  if (event) predictionUI.correctedOutcome.placeholder = `Current value ${event.effective_outcome} · corrected result 0-36`;
 });
-ui.btnSubmitCorrection.addEventListener("click", async () => {
-  const event = correctionEvents.get(ui.correctionEvent.value);
-  const correctedOutcome = Number(ui.correctedOutcome.value);
+predictionUI.btnSubmitCorrection.addEventListener("click", async () => {
+  const event = correctionEvents.get(predictionUI.correctionEvent.value);
+  const correctedOutcome = Number(predictionUI.correctedOutcome.value);
   if (!event || !Number.isInteger(correctedOutcome) || correctedOutcome < 0 || correctedOutcome > 36){
-    ui.correctionStatus.textContent = "Choose a recorded spin and enter a number from 0 to 36.";
+    predictionUI.correctionStatus.textContent = "Choose a recorded spin and enter a number from 0 to 36.";
     return;
   }
   if (correctedOutcome === event.effective_outcome){
-    ui.correctionStatus.textContent = "The corrected value must differ from the current effective value.";
+    predictionUI.correctionStatus.textContent = "The corrected value must differ from the current effective value.";
     return;
   }
   const confirmed = confirm(`Append a correction for spin ${event.spin_number}? The original result and prediction evaluation will remain in the audit history.`);
   if (!confirmed) return;
-  ui.btnSubmitCorrection.disabled = true;
+  predictionUI.btnSubmitCorrection.disabled = true;
   try {
     const token = ui.briToken.value.trim();
     if (!token) throw new Error("Enter the player token for this research account.");
@@ -1390,12 +1391,12 @@ ui.btnSubmitCorrection.addEventListener("click", async () => {
       session_id: event.sessionId,
       expected_current_outcome: event.effective_outcome,
       corrected_outcome: correctedOutcome,
-      reason: ui.correctionReason.value.trim(),
+      reason: predictionUI.correctionReason.value.trim(),
     });
     event.effective_outcome = correctedOutcome;
     event.correction_revision = result.revision;
-    ui.correctionEvent.selectedOptions[0].textContent = `Spin ${event.spin_number} · recorded ${event.original_outcome} · corrected r${result.revision} · ${event.event_id.slice(-8)}`;
-    ui.correctionStatus.textContent = `Correction ${result.revision} appended · Rebuilding derived memory...`;
+    predictionUI.correctionEvent.selectedOptions[0].textContent = `Spin ${event.spin_number} · recorded ${event.original_outcome} · corrected r${result.revision} · ${event.event_id.slice(-8)}`;
+    predictionUI.correctionStatus.textContent = `Correction ${result.revision} appended · Rebuilding derived memory...`;
     setCompanionMessage(companion.onRebuild());
     try {
       const recovery = await recoverCorrectedTable(client, {tableId: event.tableId, dataOrigin: "synthetic"});
@@ -1404,19 +1405,19 @@ ui.btnSubmitCorrection.addEventListener("click", async () => {
         runState.sessionState.engineState.predictionEngineState = predictionEngine.snapshot();
       }
       renderPredictionMonitor();
-      ui.correctionStatus.textContent = `Correction ${result.revision} appended · Rebuilt ${recovery.observationCount} observations · Forecasting resumed`;
+      predictionUI.correctionStatus.textContent = `Correction ${result.revision} appended · Rebuilt ${recovery.observationCount} observations · Forecasting resumed`;
       ui.integrity.textContent = "History rebuilt · Integrity verified";
     } catch (rebuildError) {
       predictionEngine.reset();
       runState = null;
       renderPredictionMonitor();
-      ui.correctionStatus.textContent = `Correction ${result.revision} is saved · Rebuild pending · ${rebuildError.message}`;
+      predictionUI.correctionStatus.textContent = `Correction ${result.revision} is saved · Rebuild pending · ${rebuildError.message}`;
       ui.integrity.textContent = "Correction saved · Statistics blocked pending rebuild";
     }
   } catch (error) {
-    ui.correctionStatus.textContent = `Correction not recorded · ${error.message}`;
+    predictionUI.correctionStatus.textContent = `Correction not recorded · ${error.message}`;
   } finally {
-    ui.btnSubmitCorrection.disabled = false;
+    predictionUI.btnSubmitCorrection.disabled = false;
   }
 });
 simulationControls = bindSimulationControls({

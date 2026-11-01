@@ -5,7 +5,13 @@
   "scripts": {
     "test": "node --test",
     "test:php": "php tests/php/run.php",
+    "test:browser": "playwright test",
     "benchmark:autonomous": "node scripts/autonomous-benchmark.js",
-    "benchmark:street-intelligence": "node scripts/street-intelligence-benchmark.js"
+    "benchmark:street-intelligence": "node scripts/street-intelligence-benchmark.js",
+    "benchmark:player-evidence": "node scripts/player-evidence-benchmark.js"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.6",
+    "@playwright/test": "^1.56.1"
   }
 }

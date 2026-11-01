@@ -32,6 +32,8 @@ function decisionContext(overrides = {}){
     currentStreets: [4],
     candidateStreets: [4, 7, 2],
     limits: {},
+    wageringMode: "strategy-research",
+    modelSampleSize: 100,
     ...overrides,
   };
 }
@@ -164,7 +166,7 @@ test("switch resets wager step but preserves all existing sequence losses", () =
       pendingForecast: null,
       modelPerformance: [
         {modelVersion: "uniform-v1", total: 50, meanBrier: 0.8},
-        {modelVersion: "rolling-frequency-v1", total: 50, meanBrier: 0.5, comparisonEvaluations: 50, pairedBrierDeltaUpperBound: -0.01},
+        {modelVersion: "rolling-frequency-v1", total: 50, meanBrier: 0.5, comparisonEvaluations: 50, pairedBrierDeltaUpperBound: -0.01, recentMeanBrierDelta: -0.01},
       ],
       forecastNext(){
         const probabilities = [0.4, ...new Array(11).fill(0.05), 0.05];
@@ -172,6 +174,7 @@ test("switch resets wager step but preserves all existing sequence losses", () =
           observationCount: this.observationCount,
           street: 0,
           modelVersion: "rolling-frequency-v1",
+          modelSampleSize: 50,
           candidateModels: [{modelVersion: "rolling-frequency-v1", probabilities}],
         };
         return this.pendingForecast;
@@ -209,6 +212,7 @@ test("switches require a meaningful forecast advantage unless continuing is fina
     currentStreets: [4],
     candidateStreets: [7, 0, 1],
     forecastWindowSize: 100,
+    modelSampleSize: 100,
   }));
   assert.equal(similar.action, "continue");
   assert.equal(similar.switchEvidence.justified, false);
@@ -223,9 +227,24 @@ test("switches require a meaningful forecast advantage unless continuing is fina
     currentStreets: [4],
     candidateStreets: [7, 0, 1],
     forecastWindowSize: 100,
+    modelSampleSize: 100,
   }));
   assert.equal(supported.action, "switch");
   assert.equal(supported.switchEvidence.justified, true);
+
+  const sparseTransition = decideNextAction(decisionContext({
+    progressionMode: "flat",
+    probabilities: strongProbabilities,
+    currentStreets: [4],
+    candidateStreets: [7, 0, 1],
+    forecastWindowSize: 10_000,
+    modelSampleSize: 1,
+  }));
+  assert.equal(sparseTransition.switchEvidence.justified, false);
+  assert.notEqual(sparseTransition.action, "switch");
+  assert.equal(sparseTransition.candidates.find((candidate) => candidate.action === "switch").selectionEligible, false);
+  assert.equal(sparseTransition.switchEvidence.modelSampleSize, 1);
+  assert.match(sparseTransition.switchEvidence.reason, /at least 25/);
 
   const unsustainable = decideNextAction(decisionContext({
     bankrollCents: 15_000,
@@ -233,6 +252,66 @@ test("switches require a meaningful forecast advantage unless continuing is fina
     limits: {maxStakeCents: 1_000},
   }));
   assert.equal(unsustainable.action, "switch");
+});
+
+test("transition and exponential forecasts report selected-model effective support", () => {
+  const transition = new StreetPredictionEngine({minimumObservations: 1, minimumModelEvaluations: 1});
+  transition.observe(1);
+  transition.observe(1);
+  transition.modelScores.set("street-transition-v1", {
+    total: 1, brierTotal: 0, comparisonTotal: 1, pairedDifferenceTotal: -1,
+    pairedRangeSquaredTotal: 1, recentDifferences: [-1],
+  });
+  const transitionForecast = transition.forecastNext();
+  assert.equal(transitionForecast.modelVersion, "street-transition-v1");
+  assert.equal(transitionForecast.modelSampleSize, 1);
+
+  const exponential = new StreetPredictionEngine({minimumObservations: 1, minimumModelEvaluations: 1});
+  for (const outcome of [1, 4, 7, 10, 13, 16, 19, 22]) exponential.observe(outcome);
+  exponential.modelScores.set("exponential-frequency-v1", {
+    total: 1, brierTotal: 0, comparisonTotal: 1, pairedDifferenceTotal: -1,
+    pairedRangeSquaredTotal: 1, recentDifferences: [-1],
+  });
+  const exponentialForecast = exponential.forecastNext();
+  const totalWeight = exponential.exponentialWeights.reduce((sum, weight) => sum + weight, 0);
+  assert.equal(exponentialForecast.modelVersion, "exponential-frequency-v1");
+  assert.equal(exponentialForecast.modelSampleSize, totalWeight ** 2 / exponential.exponentialWeightSquares);
+  assert.ok(exponentialForecast.modelSampleSize < exponential.observationCount);
+});
+
+test("BRI switch evaluation uses transition-model support instead of the large rolling window", () => {
+  const probabilities = [...new Array(12).fill(0.06), 0.05];
+  probabilities[4] = 0.05;
+  probabilities[7] = 0.3;
+  const engine = {
+    observationCount: 10_000,
+    pendingForecast: null,
+    modelPerformance: [],
+    forecastNext(){
+      this.pendingForecast = {
+        observationCount: this.observationCount,
+        windowSize: 10_000,
+        modelSampleSize: 1,
+        street: 7,
+        modelVersion: "street-transition-v1",
+        candidateModels: [{modelVersion: "street-transition-v1", probabilities}],
+      };
+      return this.pendingForecast;
+    },
+    observe(){},
+  };
+  const coordinator = new BriCoordinator({
+    unitCents: 100,
+    bankrollCents: 10_000,
+    wageringMode: "strategy-research",
+    engine,
+  });
+  coordinator.state.currentStreets = [4];
+  const pending = coordinator.beforeSpin();
+  const switchCandidate = pending.decision.candidates.find((candidate) => candidate.action === "switch");
+  assert.equal(pending.decision.switchEvidence.modelSampleSize, 1);
+  assert.equal(pending.decision.switchEvidence.justified, false);
+  assert.equal(switchCandidate.selectionEligible, false);
 });
 
 test("repeated switches retain total losses while resetting only position-local recovery", () => {
@@ -253,6 +332,7 @@ test("repeated switches retain total losses while resetting only position-local 
       this.pendingForecast = {
         observationCount: this.observationCount,
         windowSize: 100,
+        modelSampleSize: 100,
         street,
         modelVersion: "rolling-frequency-v1",
         candidateModels: [{modelVersion: "rolling-frequency-v1", probabilities}],
@@ -404,9 +484,9 @@ test("stop-loss floors restrict the risk capital available to any candidate", ()
 });
 
 test("evidence-gated mode suspends wagering despite outstanding losses; research mode labels experimental bets", () => {
-  const observing = decideNextAction(decisionContext({evidenceWeak: true}));
+  const observing = decideNextAction(decisionContext({evidenceWeak: true, wageringMode: "evidence-gated"}));
   assert.equal(observing.action, "stop");
-  const recovering = decideNextAction(decisionContext({evidenceWeak: true, accumulatedLossCents: 500, progressionStep: 2}));
+  const recovering = decideNextAction(decisionContext({evidenceWeak: true, wageringMode: "evidence-gated", accumulatedLossCents: 500, progressionStep: 2}));
   assert.equal(recovering.action, "stop");
   assert.equal(recovering.selected.financials.remainingUnrecoveredCents, 500);
   const research = decideNextAction(decisionContext({
@@ -537,11 +617,11 @@ test("evidence suspension can resume only after new evidence and never replenish
     get modelPerformance(){
       return [
         {modelVersion: "uniform-v1", total: 50, meanBrier: 0.92},
-        {modelVersion: "rolling-frequency-v1", total: 50, meanBrier: 0.90, comparisonEvaluations: 50, pairedBrierDeltaUpperBound: pairedUpperBound},
+        {modelVersion: "rolling-frequency-v1", total: 50, meanBrier: 0.90, comparisonEvaluations: 50, pairedBrierDeltaUpperBound: pairedUpperBound, recentMeanBrierDelta: pairedUpperBound},
       ];
     },
     forecastNext(){
-      const probabilities = [...new Array(12).fill(0.08), 0.04];
+      const probabilities = [0.4, ...new Array(11).fill(0.05), 0.05];
       this.pendingForecast = {
         observationCount: this.observationCount,
         windowSize: 50,
@@ -704,7 +784,7 @@ test("full correction recovery rebuilds effective observations, replays saved fo
   assert.equal(recovery.engine.performance.total, 4);
   assert.equal(recovery.engine.forecasts.length, 4);
   assert.equal(recovery.engine.tracker.history.at(-3), 2);
-  assert.equal(recovery.engine.modelPerformance.length, 3);
+  assert.equal(recovery.engine.modelPerformance.length, 6);
   assert.deepEqual(uploaded, recovery.engine.snapshot());
   assert.equal(calls[0][0], "rebuild");
   assert.equal(calls.filter(([type]) => type === "history").length, 2);

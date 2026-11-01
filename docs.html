@@ -31,7 +31,7 @@
         <input id="docsSearch" data-document-search type="search" placeholder="Try: migrations, expiry, Brier, provenance" autocomplete="off" />
         <span class="knowledge-search-status" data-document-search-status role="status" aria-live="polite"></span>
         <p data-document-empty hidden>No documentation sections match that search. Try another term.</p>
-        <p class="knowledge-version">Reviewed 29 October 2026 · Describes the current implementation; planned features are labelled.</p>
+        <p class="knowledge-version">Reviewed 29 October 2026 · Describes the current implementation; planned features are labelled. <span data-app-version>Version loading</span></p>
       </header>
 
       <div class="knowledge-layout">
@@ -65,7 +65,7 @@
             </article>
             <article data-searchable>
               <h3>Operating modes</h3>
-              <p>The current site provides a simulated live laboratory, a separate browser-only Test Mode, and structured research scripts. Public human Live Observation entry and CSV/historical import are not yet implemented. The PHP server rejects observed-origin session creation and writes by default unless its private <code>BANKROLL_ALLOW_OBSERVED_SUBMISSIONS</code> setting is explicitly enabled; do not enable it until the missing safeguards are built and verified.</p>
+              <p>The site provides a simulated laboratory, local physical-table Player Mode, temporary browser-only Test Mode, and structured research scripts. Player Mode stores human-entered observations only in this browser's IndexedDB; they remain unverified and are not uploaded. CSV/historical import is not implemented. The PHP server rejects observed-origin session creation and writes by default; do not enable them until server-side validation and provenance safeguards are verified.</p>
             </article>
           </section>
 
@@ -74,15 +74,15 @@
             <h2 id="liveTitle">Human Observation</h2>
             <article data-searchable>
               <h3>Current status</h3>
-              <p>There is no public manual live-entry UI in this version. The persistent table profile system applies to simulated profiles; it separates a table identifier from observation-session identifiers and can restore table-specific model state. This identity does not prove that a particular physical wheel was watched or that a sequence was uninterrupted.</p>
+              <p>Player Mode stores physical table profiles separately from playing sessions in browser IndexedDB. It supports manually entered European outcomes, actual-wager confirmation, bankroll settlement, append-only corrections, exports and explicit gap markers. Records are labelled human-observed, unverified; data is not synchronized or backed up. A table profile does not prove that a particular wheel was watched or that a sequence was uninterrupted.</p>
             </article>
             <article data-searchable>
               <h3>Continuity and observer changes</h3>
-              <p>Pause/resume markers, missing-spin declarations, sequence-continuity metadata, observer/dealer/player handover records, and conflicting-stream reconciliation are planned, not implemented. Until these exist, the system must not infer that results across a human observation break are adjacent spins.</p>
+              <p>Player Mode records explicit missed-spin gaps, uncertain resumes and observer handovers. A gap breaks rolling/transition context without inventing outcomes. Table switching requires confirmation; actual unsettled wagers survive refresh and block switching. Handovers are local records, not authenticated identities. Cross-device reconciliation remains unimplemented.</p>
             </article>
             <article data-searchable>
               <h3>Submission safeguards</h3>
-              <p>Observed-origin API submissions are disabled by default on the PHP backend. There is no verified atomic live cadence limiter, suspicious-submission quarantine, observer authentication workflow or administrator review queue. Authentication, provenance labels and a cohort UUID alone do not prove that data is genuine.</p>
+              <p>Local entries under 1.5 seconds apart are rejected; implausibly rapid or machine-like cadence is quarantined from learning. Frequent observer changes are flagged. Browser controls can be bypassed and may flag legitimate input. Observed-origin API submissions remain disabled by default; server-enforced rate limiting, authenticated observers and a moderation queue are not verified.</p>
             </article>
           </section>
 
@@ -116,7 +116,7 @@
             </article>
             <article data-searchable>
               <h3>Research retention</h3>
-              <p>Structured experiment results are distinct from Test Mode's disposable memory and from any future human live-observation archive. Test Mode's 24-hour expiry does not apply to research-result files. Public experiment pages and a persistent experiment catalogue are not yet implemented.</p>
+              <p>The Research page now runs isolated seeded strategy comparisons in a Worker, with cancellation and actual simulated financial results. These do not enter Player Mode. Test Mode's 24-hour expiry does not apply to repository research-result files. A persistent experiment catalogue and approved publishing workflow remain unimplemented.</p>
             </article>
           </section>
 
@@ -146,7 +146,7 @@
             </article>
             <article data-searchable>
               <h3>What is implemented</h3>
-              <p>Current research tracks frequency and forward scores for fixed frequency models. Dedicated lagged transition tests, streak-null comparisons, periodicity controls, conditional models and a blind predictability challenge are not implemented. The finite-grid mapping remainder and current audit scope are described in the linked Randomness Integrity report in the repository, not as a public finding about commercial systems.</p>
+              <p>BRI forward-scores six candidates: uniform, lifetime frequency, rolling 100, rolling 25, exponential frequency and smoothed one-step street transitions. It suspends wagering on weak or deteriorating evidence, non-positive estimated return or financial constraints. The transition model is exploratory; dedicated dependence batteries, periodicity controls, physical-sector models and an external blind challenge remain unimplemented.</p>
             </article>
           </section>
 
@@ -260,5 +260,6 @@ find server tests/php -name '*.php' -print0 | xargs -0 -n1 php -l</code></pre>
     </main>
   </div>
   <script type="module" src="src/ui/documentation-search.js"></script>
+  <script type="module" src="src/ui/version-label.js"></script>
 </body>
 </html>

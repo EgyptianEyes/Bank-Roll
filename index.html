@@ -14,7 +14,7 @@
     <div class="title">
       <div>
         <h1>Bank-Roll</h1>
-        <div class="subtitle">European Roulette Simulation.</div>
+        <div class="subtitle">European Roulette Simulation</div>
       </div>
     </div>
 
@@ -22,6 +22,7 @@
       <nav class="site-doc-links" aria-label="Help and documentation">
         <a href="/faq">FAQ</a>
         <a href="/docs">Docs</a>
+        <span class="app-version" data-app-version>Version loading</span>
       </nav>
       <a class="btn btn-stacked" href="research.html" aria-label="Read Bank-Roll research and methodology">
         <span class="btn-icon" aria-hidden="true">↗</span>
@@ -30,6 +31,10 @@
       <a class="btn btn-stacked" href="test-mode.html" aria-label="Try BRI with temporary Test Mode data">
         <span class="btn-icon" aria-hidden="true">◇</span>
         <span class="btn-text">Test Mode</span>
+      </a>
+      <a class="btn btn-stacked" href="player.html" aria-label="Open local physical-table Player Mode">
+        <span class="btn-icon" aria-hidden="true">◎</span>
+        <span class="btn-text">Player Mode</span>
       </a>
       <button class="btn btn-stacked" id="btnConfig">
         <span class="btn-icon">⚙️</span>
@@ -509,7 +514,7 @@
           <label for="tableSwitchCohort">Shared cohort UUID (optional)</label>
           <input id="tableSwitchCohort" type="text" placeholder="Only for an agreed observed-data cohort" />
         </div>
-        <p class="table-switch-mode">Mode: simulated outcomes. Human live observation and historical entry are not available yet.</p>
+        <p class="table-switch-mode">This simulator keeps synthetic outcomes separate from local physical-table Player Mode records.</p>
         <p id="tableSwitchStatus" role="status" aria-live="polite"></p>
         <div class="table-switch-actions">
           <button class="btn" id="btnCancelTableSwitch" type="button">Cancel</button>
@@ -522,5 +527,6 @@
 </div>
 
 <script type="module" src="src/ui/app.js"></script>
+<script type="module" src="src/ui/version-label.js"></script>
 </body>
 </html>

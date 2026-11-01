@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const html = await readFile(path.join(root, "index.html"), "utf8");
 const researchHtml = await readFile(path.join(root, "research.html"), "utf8");
 const testModeHtml = await readFile(path.join(root, "test-mode.html"), "utf8");
+const playerHtml = await readFile(path.join(root, "player.html"), "utf8");
 const faqHtml = await readFile(path.join(root, "faq.html"), "utf8");
 const docsHtml = await readFile(path.join(root, "docs.html"), "utf8");
 
@@ -112,6 +113,42 @@ test("every Test Mode DOM binding resolves to a unique element", async () => {
   const available = new Set(ids);
   const lookups = [...app.matchAll(/\$\("([^"]+)"\)/g)].map((match) => match[1]);
   assert.deepEqual([...new Set(lookups.filter((id) => !available.has(id)))], []);
+});
+
+test("Player Mode has complete local page wiring and preserves the no-server boundary", async () => {
+  const app = await readFile(path.join(root, "src/ui/player-app.js"), "utf8");
+  const store = await readFile(path.join(root, "src/storage/player-mode-store.js"), "utf8");
+  const ids = [...playerHtml.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(new Set(ids).size, ids.length, "Player Mode HTML ids must be unique");
+  const available = new Set(ids);
+  const lookups = [...app.matchAll(/\$\("([^"]+)"\)/g)].map((match) => match[1]);
+  assert.deepEqual([...new Set(lookups.filter((id) => !available.has(id)))], []);
+  assert.match(playerHtml, /src="src\/ui\/player-app\.js"/);
+  assert.match(playerHtml, /href="assets\/css\/player\.css"/);
+  assert.match(app, /new PlayerModeStore\(\)/);
+  assert.match(store, /human-observed-unverified/);
+  assert.doesNotMatch(app + store, /fetch\(|ResearchClient|localStorage|sessionStorage/);
+  assert.match(playerHtml, /data-app-version/);
+  assert.match(playerHtml, /strategy-explanation|recommendationContent/);
+  assert.match(app, /preferred strategy remains observation/);
+  assert.match(app, /player-selected; not evidence-supported/);
+  const styles = await readFile(path.join(root, "assets/css/player.css"), "utf8");
+  assert.doesNotMatch(styles, /\.strategy-explanation\{[^}]*max-height/);
+  assert.match(styles, /grid-auto-rows:44px/);
+  assert.match(styles, /@media\(max-width:760px\)[\s\S]*\.entry-panel\{order:2/);
+  assert.match(styles, /\.number-button\{min-width:0/);
+});
+
+test("all public pages display the single authoritative development version", async () => {
+  const pages = [html, researchHtml, testModeHtml, playerHtml, faqHtml, docsHtml];
+  const source = await readFile(path.join(root, "src/core/version.js"), "utf8");
+  const label = await readFile(path.join(root, "src/ui/version-label.js"), "utf8");
+  assert.match(source, /APP_VERSION\s*=\s*["']1\.1\.0[^"']*["']/);
+  assert.match(label, /APP_VERSION/);
+  for (const page of pages){
+    assert.match(page, /data-app-version/);
+    assert.match(page, /src\/ui\/version-label\.js/);
+  }
 });
 
 test("FAQ and technical documentation cover the required public knowledge areas", () => {

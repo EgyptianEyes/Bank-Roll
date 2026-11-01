@@ -119,7 +119,7 @@ test("prediction begins before spin eleven and records an immutable, scored fore
   assert.throws(() => engine.forecastNext(), /pending forecast/);
   const evaluation = engine.observe(2);
   assert.equal(evaluation.hit, true);
-  assert.equal(evaluation.modelResults.length, 3);
+  assert.equal(evaluation.modelResults.length, 6);
   assert.equal(engine.performance.successful, 1);
   assert.equal(forecast.actual, undefined);
   assert.throws(() => engine.observe(37), RangeError);

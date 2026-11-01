@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {execFileSync} from "node:child_process";
 import path from "node:path";
+import {createHash} from "node:crypto";
 
 const archive = path.resolve(process.argv[2] || "bank-roll-cpanel.zip");
 const listing = execFileSync("unzip", ["-Z1", archive], {encoding: "utf8"}).trim().split(/\r?\n/).filter(Boolean);
@@ -12,10 +13,16 @@ for (const required of [
   "index.html",
   "research.html",
   "test-mode.html",
+  "player.html",
   "faq.html",
   "docs.html",
   "assets/css/bank-roll.css",
+  "assets/css/player.css",
   "src/ui/app.js",
+  "src/ui/player-app.js",
+  "src/ui/research-app.js",
+  "src/ui/version-label.js",
+  "src/core/version.js",
   "src/ui/sandbox-app.js",
   "src/ui/documentation-search.js",
   "src/simulation/sandbox-session.js",
@@ -30,7 +37,20 @@ for (const entry of listing){
 }
 
 const readText = (relativePath) => execFileSync("unzip", ["-p", archive, `public_html/${relativePath}`], {encoding: "utf8"});
-const htmlPages = ["index.html", "research.html", "test-mode.html", "faq.html", "docs.html"];
+const htmlPages = ["index.html", "research.html", "test-mode.html", "player.html", "faq.html", "docs.html"];
+const version = readText("src/core/version.js").match(/APP_VERSION\s*=\s*["']([^"']+)["']/)?.[1];
+assert.ok(version, "single app version source is required");
+const buildInfo = JSON.parse(readText("build-info.json"));
+assert.equal(buildInfo.version, version);
+assert.match(buildInfo.build, /^[a-f0-9]{20}$/);
+const cacheKey = `${version}.${buildInfo.build}`;
+assert.equal(buildInfo.cacheKey, cacheKey);
+assert.ok(readText("src/core/version.js").includes(`APP_BUILD = "${buildInfo.build}"`));
+assert.deepEqual(new Set(Object.keys(buildInfo.files)), new Set(listing.filter((entry) => !entry.endsWith("/") && entry !== "public_html/build-info.json").map((entry) => entry.slice("public_html/".length))));
+for (const [file, digest] of Object.entries(buildInfo.files)){
+  const data = execFileSync("unzip", ["-p", archive, `public_html/${file}`]);
+  assert.equal(createHash("sha256").update(data).digest("hex"), digest, `build manifest mismatch: ${file}`);
+}
 const javascriptFiles = new Set([...entries]
   .filter((entry) => entry.startsWith("public_html/src/") && entry.endsWith(".js"))
   .map((entry) => entry.slice("public_html/".length)));
@@ -43,7 +63,8 @@ for (const page of htmlPages){
   ];
   for (const resource of resourcePaths){
     if (/^(?:https?:|data:|\/\/)/i.test(resource)) continue;
-    const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(page), resource));
+    assert.ok(new URL(resource, "https://bank-roll.invalid/").searchParams.get("v") === cacheKey, `${page} asset is not versioned: ${resource}`);
+    const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(page), resource.split("?")[0]));
     assert.ok(entries.has(`public_html/${resolved}`), `${page} references missing resource ${resource}`);
   }
 }
@@ -51,8 +72,14 @@ for (const page of htmlPages){
 for (const file of javascriptFiles){
   const source = readText(file);
   for (const match of source.matchAll(/\bfrom\s+["'](\.{1,2}\/[^"']+)["']/g)){
-    const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1]));
+    assert.ok(new URL(match[1], "https://bank-roll.invalid/").searchParams.get("v") === cacheKey, `${file} import is not versioned: ${match[1]}`);
+    const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1].split("?")[0]));
     assert.ok(javascriptFiles.has(dependency), `${file} imports missing module ${match[1]}`);
+  }
+  for (const match of source.matchAll(/new\s+Worker\s*\(\s*new\s+URL\s*\(\s*["']([^"']+)["']/g)){
+    assert.ok(new URL(match[1], "https://bank-roll.invalid/").searchParams.get("v") === cacheKey, `${file} worker is not versioned: ${match[1]}`);
+    const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1].split("?")[0]));
+    assert.ok(javascriptFiles.has(dependency), `${file} references missing worker ${match[1]}`);
   }
 }
 
@@ -60,6 +87,8 @@ const rootHtaccess = readText(".htaccess");
 assert.match(rootHtaccess, /RewriteRule \^faq\//);
 assert.match(rootHtaccess, /RewriteRule \^docs\//);
 assert.match(rootHtaccess, /Content-Security-Policy/);
+assert.match(rootHtaccess, /DirectoryIndex player\.html index\.html/);
+assert.match(rootHtaccess, /no-cache, must-revalidate/);
 
 const credentialPattern = /brp_[a-f0-9]{64}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}/i;
 for (const entry of entries){

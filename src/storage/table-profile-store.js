@@ -1,9 +1,12 @@
+
+import {createUuid} from "../core/identifiers.js";
+
 const REGISTRY_VERSION = 1;
 const DEFAULT_KEY = "bank-roll-bri-table-profiles";
 const LEGACY_KEY = "bank-roll-bri-table-profile";
 
 export class TableProfileStore{
-  constructor({storage = globalThis.localStorage, key = DEFAULT_KEY, legacyKey = LEGACY_KEY, createId = () => globalThis.crypto.randomUUID(), clock = () => new Date().toISOString()} = {}){
+  constructor({storage = globalThis.localStorage, key = DEFAULT_KEY, legacyKey = LEGACY_KEY, createId = createUuid, clock = () => new Date().toISOString()} = {}){
     if (!storage) throw new TypeError("Persistent table-profile storage is required.");
     this.storage = storage;
     this.key = key;

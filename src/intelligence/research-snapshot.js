@@ -21,8 +21,8 @@ export function createResearchSnapshot(engine, {
   const selectedProbabilities = selectedModel ? [...selectedModel.probabilities] : null;
   const performance = engine.modelPerformance.map((model) => ({...model}));
   const bestAlternative = performance
-    .filter((model) => model.modelVersion !== "uniform-v1" && Number.isFinite(model.pairedBrierDeltaToUniform))
-    .sort((left, right) => left.pairedBrierDeltaToUniform - right.pairedBrierDeltaToUniform)[0] || null;
+    .filter((model) => model.modelVersion !== "uniform-v1" && Number.isFinite(model.pairedMeanBrierDeltaToUniform))
+    .sort((left, right) => left.pairedMeanBrierDeltaToUniform - right.pairedMeanBrierDeltaToUniform)[0] || null;
   const strategyAction = strategy?.decision?.action || strategy?.decisionAction || strategy?.action || null;
   const strategyReasons = strategy?.decision?.reasons || strategy?.reasons || [];
 

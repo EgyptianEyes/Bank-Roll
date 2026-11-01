@@ -1,4 +1,5 @@
 import {mulberry32, xfnv1a} from "../core/random.js";
+import {createUuid} from "../core/identifiers.js";
 import {isValidOutcome} from "../core/roulette.js";
 import {BriCoordinator} from "../intelligence/bri-coordinator.js";
 import {createResearchSnapshot} from "../intelligence/research-snapshot.js";
@@ -9,13 +10,13 @@ export const TEST_MODE_MAX_OBSERVATIONS = 5000;
 const MAX_GENERATED_BATCH = 100;
 
 export class TestModeSession{
-  constructor({createdAt = Date.now(), now = () => Date.now(), seed = `bri-test-${globalThis.crypto.randomUUID()}`, maxObservations = TEST_MODE_MAX_OBSERVATIONS, bankrollCents = 100_00, unitCents = 100, wageringMode = "evidence-gated"} = {}){
+  constructor({createdAt = Date.now(), now = () => Date.now(), seed = `bri-test-${createUuid()}`, maxObservations = TEST_MODE_MAX_OBSERVATIONS, bankrollCents = 100_00, unitCents = 100, wageringMode = "evidence-gated"} = {}){
     if (!Number.isSafeInteger(createdAt) || createdAt < 0) throw new RangeError("Test session creation time must be a non-negative safe integer.");
     if (!Number.isSafeInteger(maxObservations) || maxObservations < 1 || maxObservations > TEST_MODE_MAX_OBSERVATIONS){
       throw new RangeError(`Test sessions are limited to ${TEST_MODE_MAX_OBSERVATIONS} outcomes.`);
     }
     if (typeof seed !== "string" || !seed) throw new TypeError("A test random seed is required.");
-    this.id = globalThis.crypto.randomUUID();
+    this.id = createUuid();
     this.datasetId = `test:${this.id}`;
     this.sourceType = "test";
     this.dataOrigin = "synthetic";

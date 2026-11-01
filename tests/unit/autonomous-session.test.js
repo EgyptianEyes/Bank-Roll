@@ -30,6 +30,7 @@ class EvidencedPredictionEngine{
         meanBrier: 0.5,
         comparisonEvaluations: 50,
         pairedBrierDeltaUpperBound: -0.1,
+        recentMeanBrierDelta: -0.1,
       },
     ];
   }

@@ -19,10 +19,12 @@
       </a>
       <nav aria-label="Main navigation">
         <a href="index.html">Laboratory</a>
+        <a href="player.html">Player Mode</a>
         <a href="test-mode.html">Try BRI</a>
         <a href="/faq">FAQ</a>
         <a href="#method">Method</a>
         <a href="#limits">Limitations</a>
+        <span class="app-version" data-app-version>Version loading</span>
       </nav>
     </header>
 
@@ -87,10 +89,27 @@
             <li>No evidence in this release establishes that a physical or commercial roulette system is biased or predictable.</li>
             <li>Synthetic bias experiments show how models behave under specified assumptions; they do not establish that those assumptions occur in real play.</li>
             <li>Observation maturity describes sample size, not predictive confidence. A candidate anomaly is not a verified incorrect entry.</li>
-            <li>There is no public human live-observation or historical import workflow in this release. The server rejects observed-origin submissions by default until live safeguards are verified.</li>
+            <li>Player Mode records unverified human observations locally. Historical import and shared live research are not enabled. The server rejects observed-origin submissions by default until live safeguards are verified.</li>
             <li>Table IDs and shared-cohort IDs organize datasets; they do not independently verify physical-wheel identity, human observation, or uninterrupted sequence continuity.</li>
             <li>Roulette has a house edge under the fair-wheel model. No strategy, progression or model guarantees profit; use the simulator for research, not financial advice.</li>
           </ul>
+        </div>
+      </section>
+
+      <section class="research-public-section" aria-labelledby="experimentTitle">
+        <div class="research-section-index">05 / EXPERIMENT</div>
+        <div class="research-section-body">
+          <h2 id="experimentTitle">Isolated synthetic laboratory</h2>
+          <p>Compare fixed strategies on identical seeded outcomes in a Worker. No result is imported into Player Mode or submitted to a server. Model configurations are fixed before the run; online scoring is not independent proof of an edge.</p>
+          <form id="experimentForm" class="experiment-form">
+            <label>Seed<input name="seed" value="next-stage-independent-1" required maxlength="100" /></label>
+            <label>Spins per strategy<input name="spins" type="number" min="100" max="10000" step="100" value="1000" required /></label>
+            <label>Dataset<select name="scenario"><option value="uniform">Fair European wheel</option><option value="biased">Synthetic 25% favoured street</option><option value="changing">Synthetic halfway distribution change</option></select></label>
+            <button id="runExperiment" type="submit">Run comparison</button>
+            <button id="cancelExperiment" type="button" disabled>Cancel</button>
+          </form>
+          <p id="experimentStatus" role="status">Ready. These are synthetic experiments, not live-table evidence.</p>
+          <div class="experiment-results"><table><caption>Actual simulated results, not recommended wagers</caption><thead><tr><th>Strategy</th><th>Profit/loss</th><th>Staked</th><th>Outcomes</th></tr></thead><tbody id="experimentResults"></tbody></table></div>
         </div>
       </section>
 
@@ -100,5 +119,7 @@
       </footer>
     </main>
   </div>
+  <script type="module" src="src/ui/version-label.js"></script>
+  <script type="module" src="src/ui/research-app.js"></script>
 </body>
 </html>

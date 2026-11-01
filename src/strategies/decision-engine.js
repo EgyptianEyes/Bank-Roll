@@ -4,6 +4,7 @@ import {STREET_GROSS_MULTIPLIER} from "../bankroll/accounting.js";
 
 export const DECISION_ACTIONS = Object.freeze(["continue", "switch", "spread", "stop"]);
 export const LOSS_HORIZONS = Object.freeze([1, 3, 5, 10]);
+const MIN_SWITCH_MODEL_SAMPLE_SIZE = 25;
 
 function uniqueStreets(streets){
   if (!Array.isArray(streets)) throw new TypeError("Streets must be an array.");
@@ -22,14 +23,14 @@ function hitProbabilityFor(streets, probabilities){
   return probability;
 }
 
-function comparePositionEvidence(current, alternative, probabilities, sampleSize){
-  if (!current?.financials || !alternative?.financials || !Number.isInteger(sampleSize) || sampleSize < 1){
+function comparePositionEvidence(current, alternative, probabilities, modelSampleSize){
+  if (!current?.financials || !alternative?.financials || !Number.isFinite(modelSampleSize) || modelSampleSize < MIN_SWITCH_MODEL_SAMPLE_SIZE){
     return {
       justified: false,
       probabilityImprovement: null,
-      standardError: null,
-      confidenceMargin: null,
-      reason: "There is not enough forecast-window information to establish that switching is better.",
+      modelSampleSize,
+      uncertaintyMargin: null,
+      reason: `The selected model has only ${Number.isFinite(modelSampleSize) ? modelSampleSize.toFixed(1) : "no"} effective observations; at least ${MIN_SWITCH_MODEL_SAMPLE_SIZE} are required before a forecast-based switch can be considered.`,
     };
   }
 
@@ -44,17 +45,16 @@ function comparePositionEvidence(current, alternative, probabilities, sampleSize
   const variance = Math.max(0,
     weights.reduce((sum, weight, category) => sum + weight * weight * probabilities[category], 0) - improvement ** 2,
   );
-  const standardError = Math.sqrt(variance / sampleSize);
-  const confidenceMargin = 1.96 * standardError;
-  const justified = improvement > confidenceMargin;
+  const uncertaintyMargin = 2 * Math.sqrt(variance / modelSampleSize);
+  const justified = improvement > uncertaintyMargin;
   return {
     justified,
     probabilityImprovement: improvement,
-    standardError,
-    confidenceMargin,
+    modelSampleSize,
+    uncertaintyMargin,
     reason: justified
-      ? "The alternative position has a statistically meaningful forecast advantage over the current position."
-      : `The alternative's estimated probability improvement (${improvement.toFixed(4)}) does not exceed its 95% uncertainty margin (${confidenceMargin.toFixed(4)}).`,
+      ? "The alternative's estimated improvement exceeds the model-support screening margin; this heuristic is not a calibrated confidence interval."
+      : `The alternative's estimated probability improvement (${improvement.toFixed(4)}) does not exceed the approximate model-support uncertainty margin (${uncertaintyMargin.toFixed(4)}); this heuristic is not a calibrated confidence interval.`,
   };
 }
 
@@ -92,7 +92,7 @@ export function projectedExposureCents({fromStep, lossCount, streetCount, unitCe
  * How many further consecutive losses the progression could absorb while
  * every wager stays inside the bankroll, stop-loss floor and stake limits.
  */
-export function sustainableLossCount({fromStep, streetCount, unitCents, progressionMode, bankrollCents, riskCapitalCents, maxStakeCents = 0, maxExposureCents = 0, maxSteps = MAX_PROGRESSION_STEP, searchLimit = 100, initialStakeCents = null}){
+export function sustainableLossCount({fromStep, streetCount, unitCents, progressionMode, bankrollCents, riskCapitalCents, maxStakeCents = 0, maxExposureCents = 0, tableMaxStakeCents = 0, maxSteps = MAX_PROGRESSION_STEP, searchLimit = 100, initialStakeCents = null}){
   const depthLimit = Math.min(maxSteps, MAX_PROGRESSION_STEP);
   let spent = 0;
   let losses = 0;
@@ -104,6 +104,7 @@ export function sustainableLossCount({fromStep, streetCount, unitCents, progress
       : multiplyMoneyCents(multiplyMoneyCents(unitCents, stakeForStep(step, progressionMode)), streetCount);
     if (maxStakeCents > 0 && stakeCents > maxStakeCents) break;
     if (maxExposureCents > 0 && stakeCents > maxExposureCents) break;
+    if (tableMaxStakeCents > 0 && Math.ceil(stakeCents / streetCount) > tableMaxStakeCents) break;
     const nextSpent = assertSafeMoneyCents(spent + stakeCents, "Cumulative loss projection");
     if (nextSpent > riskCapitalCents || nextSpent > bankrollCents) break;
     spent = nextSpent;
@@ -172,6 +173,7 @@ function buildWagerCandidate(action, streets, step, context){
     riskCapitalCents: context.riskCapitalCents,
     maxStakeCents: limits.maxStakeCents,
     maxExposureCents: limits.maxExposureCents,
+    tableMaxStakeCents: limits.tableMaxStakeCents,
     maxSteps: limits.maxSteps,
     initialStakeCents: totalStakeCents,
   });
@@ -276,7 +278,7 @@ export function decideNextAction(rawContext){
     continueCandidate,
     switchCandidate,
     context.probabilities,
-    context.forecastWindowSize,
+    context.modelSampleSize,
   );
   switchCandidate.selectionEligible = currentStreets.length === 0 ||
     !continueCandidate.feasible || !continueCandidate.sustainable || switchEvidence.justified;
@@ -320,6 +322,7 @@ export function decideNextAction(rawContext){
   const wagerable = candidates.filter((candidate) => candidate.action !== "stop" && candidate.feasible);
   const sustainableWagers = wagerable
     .filter((candidate) => candidate.sustainable && candidate.selectionEligible !== false)
+    .filter((candidate) => context.wageringMode !== "evidence-gated" || candidate.financials.expectedNetRate > 0)
     .sort(rankWagerCandidates);
 
   let selected;
@@ -331,7 +334,7 @@ export function decideNextAction(rawContext){
     selected = stopCandidate;
     reasons.push(wagerable.length === 0
       ? "No wager satisfies the current bankroll and risk constraints, so wagering is suspended while observation continues."
-      : `No feasible wager could sustain ${context.sustainabilityHorizon} further consecutive losses, so wagering is suspended rather than risking an unrecoverable progression.`);
+      : `No eligible wager combines the required estimated return with ${context.sustainabilityHorizon} affordable consecutive losses; wagering is suspended rather than chasing losses.`);
   } else {
     selected = sustainableWagers[0];
     reasons.push(describeSelection(selected, context));
@@ -406,9 +409,13 @@ function normaliseContext(context){
     observationCount = 0,
     modelVersion = null,
     forecastWindowSize = 0,
+    modelSampleSize = 0,
   } = context;
   if (!Number.isInteger(forecastWindowSize) || forecastWindowSize < 0){
     throw new RangeError("Forecast window size must be a non-negative integer.");
+  }
+  if (!Number.isFinite(modelSampleSize) || modelSampleSize < 0){
+    throw new RangeError("Model sample size must be a non-negative finite number.");
   }
   assertSafeMoneyCents(bankrollCents, "Bankroll");
   assertSafeMoneyCents(startingBankrollCents, "Starting bankroll");
@@ -441,6 +448,7 @@ function normaliseContext(context){
     observationCount,
     modelVersion,
     forecastWindowSize,
+    modelSampleSize,
     bankrollCents,
     startingBankrollCents,
     accumulatedLossCents,

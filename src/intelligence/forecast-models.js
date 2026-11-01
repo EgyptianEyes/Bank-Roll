@@ -4,6 +4,9 @@ export const STREET_MODEL_IDS = Object.freeze({
   uniform: "uniform-v1",
   rolling: "rolling-frequency-v1",
   exponential: "exponential-frequency-v1",
+  lifetime: "lifetime-frequency-v1",
+  short: "rolling-25-v1",
+  transition: "street-transition-v1",
 });
 
 const PRIOR_COUNTS = Object.freeze([...new Array(12).fill(3), 1]);
@@ -31,7 +34,7 @@ export function scoreBrier(probabilities, actualCategory){
   }, 0);
 }
 
-export function buildForecastModels(history, exponentialWeights, windowSize){
+export function buildForecastModels(history, exponentialWeights, windowSize, {lifetimeCounts, transitionCounts, previousCategory} = {}){
   const uniform = PRIOR_COUNTS.map((count) => count / PRIOR_TOTAL);
   const rollingHistory = history.slice(-windowSize);
   const rollingCounts = new Array(13).fill(0);
@@ -39,7 +42,7 @@ export function buildForecastModels(history, exponentialWeights, windowSize){
 
   const weightedCounts = exponentialWeights || new Array(13).fill(0);
   const effectiveCount = weightedCounts.reduce((sum, count) => sum + count, 0);
-  return [
+  const models = [
     {modelVersion: STREET_MODEL_IDS.uniform, probabilities: uniform},
     {
       modelVersion: STREET_MODEL_IDS.rolling,
@@ -50,6 +53,15 @@ export function buildForecastModels(history, exponentialWeights, windowSize){
       probabilities: normalise(weightedCounts, effectiveCount),
     },
   ];
+  if (lifetimeCounts){
+    models.push({modelVersion: STREET_MODEL_IDS.lifetime, probabilities: normalise(lifetimeCounts, lifetimeCounts.reduce((sum, count) => sum + count, 0))});
+    const shortCounts = new Array(13).fill(0);
+    for (const outcome of history.slice(-25)) shortCounts[categoryOf(outcome)]++;
+    models.push({modelVersion: STREET_MODEL_IDS.short, probabilities: normalise(shortCounts, Math.min(25, history.length))});
+    const transitions = previousCategory === null ? new Array(13).fill(0) : transitionCounts[previousCategory];
+    models.push({modelVersion: STREET_MODEL_IDS.transition, probabilities: normalise(transitions, transitions.reduce((sum, count) => sum + count, 0))});
+  }
+  return models;
 }
 
 export function chooseBestScoredModel(models, performance, minimumEvaluations = 25){

@@ -1,6 +1,6 @@
 # Architecture
 
-Bank-Roll uses a browser-native ES-module frontend and an optional same-origin PHP API. `index.html` contains the approved interface markup and relative references to `assets/css/bank-roll.css` and `src/ui/app.js`. Browser-only simulation remains available when the backend is not configured.
+Bank-Roll uses a browser-native ES-module frontend and an optional same-origin PHP API. Player Mode (`player.html`) is the Apache/cPanel directory entry point; `index.html` preserves the approved simulator and its board. Both work without a backend. Deploy the verified browser-only package rather than including unverified server features.
 
 ## Implemented boundaries
 
@@ -9,7 +9,7 @@ Bank-Roll uses a browser-native ES-module frontend and an optional same-origin P
 - `src/core/mathematics.js`: European probabilities and integer minor-unit conversion.
 - `src/observation/street-tracker.js`: all twelve street counts, rolling windows, absences, intervals and consecutive appearances.
 - `src/observation/statistics.js`: session-level summary statistics.
-- `src/intelligence/forecast-models.js`: uniform, rolling-frequency and exponentially weighted models, multicategory Brier scores, and evidence-based prequential selection.
+- `src/intelligence/forecast-models.js`: uniform, lifetime, rolling-100, rolling-25, exponential and one-step transition models, multicategory Brier scores, and prequential selection.
 - `src/intelligence/prediction-engine.js`: pre-outcome forecasts and post-outcome scoring; no UI or wager dependencies. Compact versioned snapshots restore rolling evidence without replaying the full history.
 - `src/intelligence/research-snapshot.js`: derives a bounded current-dataset view from the authoritative tracker and prediction engine, including all twelve street profiles and recent number frequencies.
 - `src/intelligence/research-events.js`: publishes one transient observation event per resolved simulator spin and retains only a capped set of significant milestone/state-change entries. Listener failures are isolated from simulation.
@@ -30,6 +30,11 @@ Bank-Roll uses a browser-native ES-module frontend and an optional same-origin P
 - `src/ui/charts.js`: existing canvas chart rendering.
 - `src/ui/controls.js`: injectable Run/Stop/Reset callbacks.
 - `src/ui/app.js`: DOM bindings, wheel animation, session presentation and widget behavior.
+- `src/ui/player-app.js`: human entry, explicit table/session controls, actual-wager confirmation, reproducible rules and local audit presentation.
+- `src/simulation/player-session.js`: composes the existing predictor, shared evidence assessment, decision engine and accounting around asynchronous local transactions; it never auto-confirms a wager.
+- `src/simulation/player-rules.js`: shared local monetary settings, actual-wager approval, replay and cadence assessment.
+- `src/storage/player-mode-store.js`: IndexedDB table/session identity, optimistic session revisions, append-only observations/revisions, pre-outcome forecast events and all-session export.
+- `src/ui/research-app.js`: actually constructs the research Worker, displays isolated synthetic comparisons and supports cancellation.
 - `src/ui/research-panel.js`: safe text-only renderer for the live research panel; per-spin presentation updates are coalesced to animation frames.
 - `src/storage/research-client.js`: authenticated API client and a bounded localStorage outbox for forecast, decision and outcome writes; player tokens are kept in sessionStorage by the UI.
 - `src/storage/table-profile-store.js`: versioned local registry for multiple table identities, migration from the earlier single-profile key, explicit activation, and synchronization with owner-scoped server profiles.
@@ -44,10 +49,10 @@ After the engine consumes each outcome, the common live-app outcome handler deri
 
 The PHP API uses bearer tokens whose hashes are stored in the database. Tables, sessions, events, and metrics are owner-scoped. Synthetic and observed data are labelled separately. Shared-research consent is an explicit player preference plus per-session consent; `shared-aggregates.php` pools only explicitly consented observed data into anonymous cross-player street totals and requires the requester to share research too. Credentials are loaded from environment variables or a PHP array outside the web root selected by `BANKROLL_CONFIG_FILE`.
 
-Table identity is separate from `research_sessions`: multiple sessions belong to one table profile. The local profile registry survives browser reloads; migration `006_active_table_identity.sql` stores one owner-scoped active table ID for account-level restoration, and `tables.php` supports an authenticated active-table update after verifying ownership. Session creation also marks its table active. The current live application is still simulation-only. Its compact local learner cache is keyed by table ID; authenticated server checkpoints are restored for the selected table. Table selection does not imply uninterrupted sequence continuity. This phase adds no human observation cadence, gap, observer, dealer, quarantine, or import workflow.
+Table identity is separate from sessions. The simulator's registry and Player Mode's IndexedDB database are different stores. Player Mode never calls the PHP API and never promotes a browser observation to trusted shared data. Its gap markers break model continuity, while old table observations survive new sessions. Unknown continuity on resume is explicitly recorded; pending actual wagers survive refresh and must be settled before switching or ending. Corrections replay every affected session's actual-wager ledger and invalidate the table's prospective evidence epoch without inventing replacement historical forecasts. See [Player Mode](player-mode.md).
 
 The original supplied HTML is retained at `tests/fixtures/legacy-baseline.html` for behavioral regression tests. `index-foundation.html` is a separate reference copy and is not the deployment entry point.
 
 ## Deliberate current limits
 
-Corrections append immutable revisions and mark affected evaluation rows. Affected table/model state is invalidated and new learning is blocked until `rebuild.php` recomputes the derived statistics from the effective event history and the client uploads a freshly reconstructed model checkpoint; the rebuild is idempotent and interrupted runs remain claimable. Statistical anomalies remain candidates and never verify a bad entry. Still outstanding are calibrated distribution-vs-prediction-vs-wager evidence, adaptive model lifecycle and holdout promotion, account/token recovery, manual/imported data workflows, forward Monte Carlo scenario planning, a worker-backed experiment UI, and persistent experiment/hypothesis/journal publishing. Import all six migrations in numeric order when deploying. Migrations 005 and 006 require MySQL/MariaDB verification in the deployment environment before enabling observed submissions.
+The server correction/rebuild path remains separate and unverified against MySQL in this environment. Statistical anomalies never verify a bad entry. Still outstanding are calibrated next-wager evidence, adaptive model promotion, account recovery, imports, Monte Carlo planning and persistent hypothesis/publishing workflows. Browser restore/export currently load a whole table: this is not million-spin browser persistence. A server rollout needs verified migrations, cursor-paged `(table, sequence)` retrieval, incremental correction-aware aggregates, authenticated contributor quotas/quarantine and explicit consent before observed writes are enabled. The existing schema/indexes are a foundation, not evidence that global learning is operational.

@@ -26,6 +26,36 @@ function applyResearchActionPolicy(decision, policy, hasPosition){
   });
 }
 
+export function assessForecastEvidence(engine, minimumModelEvaluations = 25, selectedModelVersion = engine.pendingForecast?.modelVersion){
+  const performance = engine.modelPerformance;
+  const uniform = performance.find((model) => model.modelVersion === STREET_MODEL_IDS.uniform);
+  const alternatives = performance.filter((model) =>
+    model.modelVersion !== STREET_MODEL_IDS.uniform &&
+    (!selectedModelVersion || model.modelVersion === selectedModelVersion) &&
+    model.comparisonEvaluations >= minimumModelEvaluations &&
+    Number.isFinite(model.pairedBrierDeltaUpperBound),
+  );
+  if (!uniform || uniform.total < minimumModelEvaluations || alternatives.length === 0){
+    return {evidenceWeak: true, reason: "insufficient forward-tested evaluations against the uniform baseline"};
+  }
+  const best = alternatives.reduce((left, right) =>
+    left.pairedBrierDeltaUpperBound <= right.pairedBrierDeltaUpperBound ? left : right);
+  if (best.pairedBrierDeltaUpperBound >= 0 || !(best.recentMeanBrierDelta < 0)){
+    return {
+      evidenceWeak: true,
+      reason: "the selected model does not beat uniform on both the cumulative confidence bound and recent forward scores",
+      bestModel: best.modelVersion,
+      pairedBrierDeltaUpperBound: best.pairedBrierDeltaUpperBound,
+    };
+  }
+  return {
+    evidenceWeak: false,
+    reason: `${best.modelVersion} has a confidence bound below the uniform baseline`,
+    bestModel: best.modelVersion,
+    pairedBrierDeltaUpperBound: best.pairedBrierDeltaUpperBound,
+  };
+}
+
 /**
  * Central BRI orchestration layer.
  *
@@ -157,32 +187,7 @@ export class BriCoordinator{
    * A fair wheel always remains an eligible explanation.
    */
   evidenceAssessment(){
-    const performance = this.engine.modelPerformance;
-    const uniform = performance.find((model) => model.modelVersion === STREET_MODEL_IDS.uniform);
-    const alternatives = performance.filter((model) =>
-      model.modelVersion !== STREET_MODEL_IDS.uniform &&
-      model.comparisonEvaluations >= this.minimumModelEvaluations &&
-      Number.isFinite(model.pairedBrierDeltaUpperBound),
-    );
-    if (!uniform || uniform.total < this.minimumModelEvaluations || alternatives.length === 0){
-      return {evidenceWeak: true, reason: "insufficient forward-tested evaluations against the uniform baseline"};
-    }
-    const best = alternatives.reduce((left, right) =>
-      left.pairedBrierDeltaUpperBound <= right.pairedBrierDeltaUpperBound ? left : right);
-    if (best.pairedBrierDeltaUpperBound >= 0){
-      return {
-        evidenceWeak: true,
-        reason: "no competing model has a confidence bound demonstrating lower Brier loss than uniform",
-        bestModel: best.modelVersion,
-        pairedBrierDeltaUpperBound: best.pairedBrierDeltaUpperBound,
-      };
-    }
-    return {
-      evidenceWeak: false,
-      reason: `${best.modelVersion} has a confidence bound below the uniform baseline`,
-      bestModel: best.modelVersion,
-      pairedBrierDeltaUpperBound: best.pairedBrierDeltaUpperBound,
-    };
+    return assessForecastEvidence(this.engine, this.minimumModelEvaluations);
   }
 
   /** Before-spin lifecycle. Returns the forecast, decision and prepared wager. */
@@ -230,6 +235,7 @@ export class BriCoordinator{
       includeTimestamp: this.recordDecisions,
       observationCount: this.engine.observationCount,
       forecastWindowSize: forecast.windowSize ?? 0,
+      modelSampleSize: forecast.modelSampleSize ?? 0,
       modelVersion: forecast.modelVersion,
     });
     const decision = applyResearchActionPolicy(rankedDecision, this.researchActionPolicy, this.state.currentStreets.length > 0);
@@ -298,7 +304,7 @@ export class BriCoordinator{
       } else {
         this.state.accumulatedLossCents = assertSafeMoneyCents(this.state.accumulatedLossCents + pending.wager.totalStakeCents, "Accumulated losses");
         this.state.currentProgressionLossCents = assertSafeMoneyCents(this.state.currentProgressionLossCents + pending.wager.totalStakeCents, "Current progression losses");
-        this.state.progressionStep++;
+        this.state.progressionStep = this.progressionMode === "flat" ? 1 : this.state.progressionStep + 1;
       }
     }
     return {

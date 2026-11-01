@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Record European roulette results from a physical table, review BRI recommendations and account for wagers you confirm." />
+  <meta name="theme-color" content="#101a18" />
+  <title>Player Mode | Bank-Roll</title>
+  <link rel="stylesheet" href="assets/css/player.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="player.html" aria-label="Bank-Roll Player Mode home"><span class="brand-mark">BR</span><span>Bank-Roll</span><small>PLAYER MODE</small></a>
+    <nav aria-label="Other Bank-Roll modes">
+      <a href="index.html">Simulator</a>
+      <a href="test-mode.html">Test</a>
+      <a href="research.html">Research</a>
+      <a href="/faq">FAQ</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">PHYSICAL TABLE · LOCAL RECORD</p>
+        <h1 id="page-title">Player Mode</h1>
+        <p class="intro-copy">Enter observed results. BRI's recommendations are forecasts, not evidence of an edge.</p>
+      </div>
+      <div class="privacy-mark"><span aria-hidden="true">●</span> Stored on this device</div>
+    </section>
+
+    <section id="setupPanel" class="empty-state" hidden>
+      <p class="eyebrow">BEGIN A TABLE RECORD</p>
+      <h2>No table selected</h2>
+      <p>Create a physical table profile to keep its outcomes, sessions and corrections separate on this device.</p>
+      <button class="button button-primary" id="emptyCreateTable" type="button">Create table</button>
+    </section>
+
+    <div id="playerWorkspace" hidden>
+      <section class="tablebar" aria-label="Active table and session">
+        <details class="table-controls"><summary>Table: <strong id="activeTableName">Loading</strong> · session controls</summary>
+        <div class="table-identity">
+          <label for="tableSelect">Physical table</label>
+          <select id="tableSelect" aria-label="Select physical table"></select>
+          <button class="button button-quiet" id="switchTableButton" type="button">Switch Table</button>
+          <span id="tableMeta" class="table-meta"></span>
+        </div>
+        <div class="table-actions">
+          <button class="button button-quiet" id="newTableButton" type="button">＋ Table</button>
+          <button class="button button-quiet" id="newSessionButton" type="button">New session</button>
+          <button class="button button-quiet" id="endSessionButton" type="button">End session</button>
+          <button class="button button-quiet" id="handoverButton" type="button">Observer handover</button>
+          <button class="icon-button" id="exportButton" type="button" title="Export table history" aria-label="Export table history">⇩</button>
+        </div>
+        </details>
+      </section>
+
+      <section class="account-strip" aria-label="Session accounting">
+        <div><span class="stat-label">Available bankroll</span><strong id="bankrollValue">£0.00</strong></div>
+        <div><span class="stat-label">Session result</span><strong id="profitValue">£0.00</strong></div>
+        <div><span class="stat-label">Actual wagers</span><strong id="wagerRecord">0 · 0</strong><small>won · lost</small></div>
+        <div><span class="stat-label">Unrecovered losses</span><strong id="lossValue">£0.00</strong></div>
+      </section>
+
+      <div class="player-grid">
+        <section class="panel recommendation-panel" aria-labelledby="recommendation-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">CURRENT BRI STRATEGY</p><h2 id="recommendation-title">Observe first · flat baseline</h2></div>
+            <span class="status-pill" id="evidenceStatus">NO FORECAST</span>
+          </div>
+          <div id="recommendationContent" class="recommendation-content" aria-live="polite">
+            <p class="empty-copy">Start or resume a session, then prepare a recommendation.</p>
+          </div>
+          <div class="recommendation-actions">
+            <button class="button button-quiet" id="confirmRecommendationButton" type="button" disabled>Confirm BRI wager</button>
+            <button class="button button-quiet" id="manualWagerButton" type="button">Manual wager</button>
+            <button class="button button-stop" id="noBetButton" type="button" disabled>Record no bet</button>
+          </div>
+          <div id="wagerState" class="wager-state" role="status">No wager is awaiting a result.</div>
+          <details class="strategy-rules"><summary>Rules, evidence and session summary</summary><button class="button button-quiet" id="prepareButton" type="button">Refresh next-spin analysis</button><div id="strategyRules"></div><ul id="modelScores"></ul><p id="sessionSummary"></p></details>
+        </section>
+
+        <section class="panel entry-panel" aria-labelledby="entry-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">HUMAN RESULT ENTRY</p><h2 id="entry-title">Winning number</h2></div>
+            <span class="selected-number" id="selectedNumber" aria-live="polite">—</span>
+          </div>
+          <div class="roulette-board" id="rouletteBoard" role="group" aria-label="European roulette number keypad"></div>
+          <div class="entry-footer">
+            <button class="button button-primary entry-submit" id="recordOutcomeButton" type="button" disabled>Record result</button>
+            <button class="button button-quiet" id="gapButton" type="button">Missed spin</button>
+            <button class="button button-quiet" id="undoButton" type="button">Undo last</button>
+          </div>
+          <p class="entry-footnote" id="entryStatus" role="status">Each result is stored as a human observation, not verified table data.</p>
+        </section>
+
+        <section class="panel history-panel" aria-labelledby="history-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">CHRONOLOGICAL · CORRECTABLE</p><h2 id="history-title">Recent results</h2></div>
+            <span class="history-count" id="historyCount">0 results</span>
+          </div>
+          <ol class="history-list" id="historyList"></ol>
+          <details><summary>Observation audit trail</summary><ul id="auditList"></ul></details>
+        </section>
+      </div>
+    </div>
+
+    <footer class="page-footer">
+      <span>European single-zero roulette · 37 outcomes</span>
+      <span>Local data is not synced or backed up</span>
+      <span class="app-version" data-app-version>Version loading</span>
+    </footer>
+  </main>
+
+  <dialog class="dialog" id="tableDialog">
+    <form id="tableForm" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">LOCAL PHYSICAL PROFILE</p><h2 id="tableDialogTitle">Create table</h2></div><button class="icon-button" value="cancel" formnovalidate aria-label="Close">×</button></div>
+      <label>Table name<input name="name" required maxlength="120" autocomplete="off" placeholder="Table 4" /></label>
+      <label>Venue<input name="venue" maxlength="120" autocomplete="off" placeholder="Casino or location" /></label>
+      <div class="form-row"><label>Observer<input name="observer" maxlength="80" autocomplete="off" /></label><label>Dealer<input name="dealer" maxlength="80" autocomplete="off" /></label></div>
+      <fieldset><legend>Session limits</legend>
+        <div class="form-row"><label>Starting bankroll (£)<input name="bankroll" type="number" min="1" step="0.01" value="100" required /></label><label>Unit stake (£)<input name="unit" type="number" min="0.01" step="0.01" value="0.20" required /></label></div>
+        <div class="form-row"><label>Max total stake (£)<input name="maxStake" type="number" min="0" step="0.01" value="5" /></label><label>Stop-loss (£)<input name="stopLoss" type="number" min="0" step="0.01" value="25" /></label></div>
+        <div class="form-row"><label>Take-profit (£, 0 disables)<input name="takeProfit" type="number" min="0" step="0.01" value="25" /></label><label>Maximum progression step<input name="maxSteps" type="number" min="1" max="10" step="1" value="6" required /></label></div>
+        <label>Progression<select name="progression"><option value="flat">Flat · same stake</option><option value="linear">Linear · +1 unit per loss</option><option value="fibo">Fibonacci</option><option value="martingale">Martingale · doubles</option></select></label>
+      </fieldset>
+      <p class="dialog-note">Flat staking is the default. Progressions do not change roulette odds or guarantee recovery.</p>
+      <div class="dialog-actions"><button class="button button-quiet" value="cancel" formnovalidate>Cancel</button><button class="button button-primary" id="saveTableButton" value="default">Save table</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="wagerDialog">
+    <form id="wagerForm" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">PLAYER-ENTERED ACTION</p><h2>Manual street wager</h2></div><button class="icon-button" value="cancel" formnovalidate aria-label="Close">×</button></div>
+      <p class="dialog-note">Only this confirmed wager is settled against your session bankroll.</p>
+      <fieldset class="street-picker" id="streetPicker"><legend>Choose streets</legend></fieldset>
+      <label>Stake per street (£)<input name="stake" type="number" min="0.01" step="0.01" value="0.20" required /></label>
+      <p class="wager-total" id="manualWagerTotal">Total stake: £0.00</p>
+      <div class="dialog-actions"><button class="button button-quiet" value="cancel" formnovalidate>Cancel</button><button class="button button-primary" value="default">Confirm manual wager</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="correctionDialog">
+    <form id="correctionForm" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">APPEND-ONLY CORRECTION</p><h2>Correct a result</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div>
+      <label>Recorded result<select name="observation" id="correctionObservation" required></select></label>
+      <label>Correct result<select name="outcome" id="correctionOutcome" required></select></label>
+      <label>Reason<input name="reason" maxlength="240" autocomplete="off" /></label>
+      <p class="dialog-note">The original entry remains in the audit history. Session accounting is recalculated from actual wagers.</p>
+      <div class="dialog-actions"><button class="button button-quiet" value="cancel">Cancel</button><button class="button button-primary" value="default">Save correction</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/ui/player-app.js"></script>
+  <script type="module" src="src/ui/version-label.js"></script>
+</body>
+</html>

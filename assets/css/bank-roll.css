@@ -1,3 +1,9 @@
+.experiment-form{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+.experiment-form label{display:grid;gap:6px;min-width:0}
+.experiment-form input,.experiment-form select,.experiment-form button{min-height:44px;max-width:100%;min-width:0}
+.experiment-results{max-width:100%;overflow-x:auto;margin-top:16px}
+.experiment-results table{width:100%;border-collapse:collapse;font-size:.85rem}
+.experiment-results th,.experiment-results td{padding:10px;text-align:left;border-bottom:1px solid #46515b}
 :root{
   --bg: #0a0e13;
   --panel: rgba(255,255,255,0.05);
@@ -580,7 +586,7 @@ body{
 .test-metrics dd{margin:4px 0 0;color:var(--text);font:600 0.82rem var(--mono);overflow-wrap:anywhere}
 .test-forecast-detail{margin:11px 0 0;color:var(--muted2);font-size:0.75rem;line-height:1.55}
 .test-model-heading{margin:15px 0 0;color:var(--muted2);font-size:0.72rem;font-weight:600}
-.test-companion-message{margin:12px 0 0;padding-left:10px;border-left:2px solid var(--accent2);color:var(--muted);font-size:0.8rem;line-height:1.55}
+.test-companion-message{height:3.75em;margin:12px 0 0;padding-left:10px;border-left:2px solid var(--accent2);overflow-y:auto;color:var(--muted);font-size:0.8rem;line-height:1.55}
 .test-street-section{margin-top:16px}
 .test-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
 .test-history-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;max-height:300px;overflow:auto;margin:0;padding:0;list-style:none}
@@ -1156,7 +1162,9 @@ body{
   font-variant-numeric: tabular-nums;
 }
 .companion-message{
+  height: 3.75em;
   margin: 10px 0 0;
+  overflow-y: auto;
   color: var(--accent);
   font-size: 0.88rem;
   line-height: 1.4;
@@ -1376,6 +1384,7 @@ h1{
 .site-doc-links{display:flex;align-items:center;gap:12px;padding:0 3px}
 .site-doc-links a{color:var(--muted);font-size:0.76rem;text-decoration:none}
 .site-doc-links a:hover{color:var(--text)}
+.app-version{color:var(--muted2);font-size:0.66rem;white-space:nowrap}
 
 .btn{
   appearance:none;

@@ -40,7 +40,7 @@ test("research snapshot reports all street counts and number frequency from the 
   assert.deepEqual(snapshot.recentNumberCounts, new Array(37).fill(1));
   assert.equal(snapshot.latestForecast.spinNumber, 37);
   assert.equal(snapshot.evaluation.total, 27);
-  assert.equal(snapshot.modelPerformance.length, 3);
+  assert.equal(snapshot.modelPerformance.length, 6);
 });
 
 test("research events deliver each observation before milestone events and bound the timeline", () => {
