@@ -1,6 +1,6 @@
 # Outstanding requirements register
 
-Status after the 2026-11-01 local next-stage implementation. This register distinguishes shipped local capabilities from server, research and scale work not validated here. The detailed initial-source audit is [BANK-ROLL-NEXT-STAGE-AUDIT.md](BANK-ROLL-NEXT-STAGE-AUDIT.md); test and benchmark boundaries are in [BANK-ROLL-NEXT-STAGE-REPORT.md](BANK-ROLL-NEXT-STAGE-REPORT.md).
+Status after the 2026-11-01 local next-stage implementation. This register distinguishes shipped local capabilities from server, research and scale work not validated here. The detailed initial-source audit is [BANK-ROLL-NEXT-STAGE-AUDIT.md](docs/archive/BANK-ROLL-NEXT-STAGE-AUDIT.md); test and benchmark boundaries are in [BANK-ROLL-NEXT-STAGE-REPORT.md](docs/archive/BANK-ROLL-NEXT-STAGE-REPORT.md).
 
 | Priority | Requirement | Status / evidence needed before closure |
 |---|---|---|
