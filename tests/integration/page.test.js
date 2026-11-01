@@ -6,13 +6,14 @@ import {fileURLToPath} from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const html = await readFile(path.join(root, "index.html"), "utf8");
+const homeHtml = await readFile(path.join(root, "home.html"), "utf8");
 const researchHtml = await readFile(path.join(root, "research.html"), "utf8");
 const testModeHtml = await readFile(path.join(root, "test-mode.html"), "utf8");
 const playerHtml = await readFile(path.join(root, "player.html"), "utf8");
 const faqHtml = await readFile(path.join(root, "faq.html"), "utf8");
 const docsHtml = await readFile(path.join(root, "docs.html"), "utf8");
 
-test("static entry page uses external local assets and resolves every module import", async () => {
+test("static simulator page uses external local assets and resolves every module import", async () => {
   assert.doesNotMatch(html, /<style\b|<script\s*>/i);
   const stylesheet = html.match(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/i)?.[1];
   const script = html.match(/<script\b[^>]*type="module"[^>]*src="([^"]+)"/i)?.[1];
@@ -71,7 +72,16 @@ test("simulation settings cannot silently define a replacement table profile", a
   assert.match(app, /tableProfiles\.ensureActive\(\)/);
 });
 
-test("homepage links to the public research page without requesting a missing legacy script", () => {
+test("mission-led homepage explains the project and links to all primary experiences", () => {
+  const homepageText = homeHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").toLowerCase();
+  for (const phrase of ["instinct misses", "bank-roll intelligence", "forward-looking tests", "never places a bet automatically", "synthetic", "no real-wheel bias"]){
+    assert.ok(homepageText.includes(phrase), `homepage is missing: ${phrase}`);
+  }
+  for (const href of ["player.html", "index.html", "test-mode.html", "research.html", "faq.html", "docs.html"]){
+    assert.ok(homeHtml.includes(`href="${href}"`), `homepage is missing a link to ${href}`);
+  }
+  assert.match(homeHtml, /data-app-version/);
+  assert.match(homeHtml, /src\/ui\/version-label\.js/);
   assert.match(html, /href="research\.html"/);
   assert.doesNotMatch(html, /<script\s+src="script\.js"/i);
   assert.match(html, /<script\s+type="module"\s+src="src\/ui\/app\.js"/i);
@@ -135,12 +145,16 @@ test("Player Mode has complete local page wiring and preserves the no-server bou
   const styles = await readFile(path.join(root, "assets/css/player.css"), "utf8");
   assert.doesNotMatch(styles, /\.strategy-explanation\{[^}]*max-height/);
   assert.match(styles, /grid-auto-rows:44px/);
-  assert.match(styles, /@media\(max-width:760px\)[\s\S]*\.entry-panel\{order:2/);
+  assert.ok(playerHtml.indexOf('class="account-strip"') < playerHtml.indexOf('class="player-grid"'));
+  assert.match(playerHtml, /roulette-board number-entry-board/);
+  const entryStyles = await readFile(path.join(root, "assets/css/number-entry.css"), "utf8");
+  assert.match(entryStyles, /repeat\(13,minmax\(44px,auto\)\)/);
+  assert.match(entryStyles, /44px repeat\(12,minmax\(44px,1fr\)\)/);
   assert.match(styles, /\.number-button\{min-width:0/);
 });
 
 test("all public pages display the single authoritative development version", async () => {
-  const pages = [html, researchHtml, testModeHtml, playerHtml, faqHtml, docsHtml];
+  const pages = [homeHtml, html, researchHtml, testModeHtml, playerHtml, faqHtml, docsHtml];
   const source = await readFile(path.join(root, "src/core/version.js"), "utf8");
   const label = await readFile(path.join(root, "src/ui/version-label.js"), "utf8");
   assert.match(source, /APP_VERSION\s*=\s*["']1\.1\.0[^"']*["']/);

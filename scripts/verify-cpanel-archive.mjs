@@ -10,6 +10,7 @@ const topLevels = new Set(listing.map((entry) => entry.split("/")[0]).filter(Boo
 assert.deepEqual([...topLevels], ["public_html"], "archive must have exactly one top-level public_html directory");
 assert.ok(entries.has("public_html/.htaccess"), "root .htaccess is required");
 for (const required of [
+  "home.html",
   "index.html",
   "research.html",
   "test-mode.html",
@@ -18,8 +19,15 @@ for (const required of [
   "docs.html",
   "assets/css/bank-roll.css",
   "assets/css/player.css",
+  "assets/css/site-shell.css",
+  "assets/css/theme.css",
+  "assets/css/number-entry.css",
+  "assets/css/player-focus.css",
+  "assets/css/test-entry-feedback.css",
+  "assets/js/theme.js",
   "src/ui/app.js",
   "src/ui/player-app.js",
+  "src/ui/player-focus.js",
   "src/ui/research-app.js",
   "src/ui/version-label.js",
   "src/core/version.js",
@@ -37,7 +45,7 @@ for (const entry of listing){
 }
 
 const readText = (relativePath) => execFileSync("unzip", ["-p", archive, `public_html/${relativePath}`], {encoding: "utf8"});
-const htmlPages = ["index.html", "research.html", "test-mode.html", "player.html", "faq.html", "docs.html"];
+const htmlPages = ["home.html", "index.html", "research.html", "test-mode.html", "player.html", "faq.html", "docs.html"];
 const version = readText("src/core/version.js").match(/APP_VERSION\s*=\s*["']([^"']+)["']/)?.[1];
 assert.ok(version, "single app version source is required");
 const buildInfo = JSON.parse(readText("build-info.json"));
@@ -71,7 +79,7 @@ for (const page of htmlPages){
 
 for (const file of javascriptFiles){
   const source = readText(file);
-  for (const match of source.matchAll(/\bfrom\s+["'](\.{1,2}\/[^"']+)["']/g)){
+  for (const match of source.matchAll(/\b(?:from\s+|import\s*(?:\(\s*)?)["'](\.{1,2}\/[^"']+)["']/g)){
     assert.ok(new URL(match[1], "https://bank-roll.invalid/").searchParams.get("v") === cacheKey, `${file} import is not versioned: ${match[1]}`);
     const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1].split("?")[0]));
     assert.ok(javascriptFiles.has(dependency), `${file} imports missing module ${match[1]}`);
@@ -87,7 +95,7 @@ const rootHtaccess = readText(".htaccess");
 assert.match(rootHtaccess, /RewriteRule \^faq\//);
 assert.match(rootHtaccess, /RewriteRule \^docs\//);
 assert.match(rootHtaccess, /Content-Security-Policy/);
-assert.match(rootHtaccess, /DirectoryIndex player\.html index\.html/);
+assert.match(rootHtaccess, /DirectoryIndex home\.html player\.html index\.html/);
 assert.match(rootHtaccess, /no-cache, must-revalidate/);
 
 const credentialPattern = /brp_[a-f0-9]{64}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}/i;

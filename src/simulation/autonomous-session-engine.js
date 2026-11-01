@@ -41,6 +41,7 @@ export class AutonomousSessionEngine{
         maxSteps: config.maxSteps,
       },
       candidateCount: config.maxStreets,
+      maximumStreetCount: config.maxStreets,
       wageringMode: config.wageringMode || "evidence-gated",
       researchActionPolicy: config.researchActionPolicy || "adaptive",
       decisionHistoryLimit: config.decisionHistoryLimit ?? 1000,

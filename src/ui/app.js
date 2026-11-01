@@ -12,10 +12,8 @@ import {ResearchClient, resolveTrustedApiBase} from "../storage/research-client.
 import {evaluateDistributionShift} from "../intelligence/integrity/integrity-monitor.js";
 import {runFalseEntryChallenge} from "../intelligence/integrity/false-entry-challenge.js";
 import {recoverCorrectedTable} from "../intelligence/rebuild.js";
-import {decideNextAction} from "../strategies/decision-engine.js";
 import {toMinorUnits} from "../core/mathematics.js";
 import {BriCompanion} from "../companion/companion.js";
-import {STREET_MODEL_IDS} from "../intelligence/forecast-models.js";
 import {ResearchEventStream} from "../intelligence/research-events.js";
 import {createResearchSnapshot} from "../intelligence/research-snapshot.js";
 import {ResearchPanel} from "./research-panel.js";
@@ -147,24 +145,20 @@ const researchPanel = new ResearchPanel($("researchIntelligence"), researchEvent
 let researchDatasetId = newResearchId();
 let activeResearchTableId = null;
 let lastDecisionAction = null;
-let sequenceLossCents = 0;
 const rouletteBoard = new RouletteBoard(ui.streetGrid, {isRed, streetOf, fromMinorUnits: (cents) => cents / 100});
 
 function setCompanionMessage(message){
   if (message) predictionUI.companion.textContent = message;
 }
 
-function evidenceIsWeak(){
-  const performance = predictionEngine.modelPerformance;
-  const uniform = performance.find((model) => model.modelVersion === STREET_MODEL_IDS.uniform);
-  const alternatives = performance.filter((model) => model.modelVersion !== STREET_MODEL_IDS.uniform && model.total >= 25);
-  if (!uniform || uniform.total < 25 || alternatives.length === 0) return true;
-  return Math.min(...alternatives.map((model) => model.meanBrier)) >= uniform.meanBrier;
-}
-
-function renderDecisionStatus(forecast, prepared, liveSession, cfg){
+function renderDecisionStatus(prepared, cfg){
   if (!prepared){
     predictionUI.decision.textContent = "-";
+    return;
+  }
+  if (prepared.action === "stop"){
+    predictionUI.decision.textContent = `${cfg.simulationMode === "bri-autonomous" ? "BRI" : "LEGACY"} NO BET · ${prepared.reason}`;
+    predictionUI.decision.title = `Session stopped: ${prepared.reason}. No wager was placed for this spin.`;
     return;
   }
   if (cfg.simulationMode === "bri-autonomous"){
@@ -174,7 +168,9 @@ function renderDecisionStatus(forecast, prepared, liveSession, cfg){
       predictionUI.decision.title = "No forecast is available yet; BRI is observing.";
       return;
     }
-    predictionUI.decision.textContent = `${decision.action.toUpperCase()} · ${decision.selected.financials ? money(decision.selected.financials.totalStakeCents / 100) : "observe"}`;
+    predictionUI.decision.textContent = prepared.wager
+      ? `BRI ${decision.action.toUpperCase()} · ${money(prepared.wager.totalStakeCents / 100)}`
+      : "BRI NO BET · observing";
     predictionUI.decision.title = decision.reasons.join(" ");
     if (decision.action !== lastDecisionAction){
       setCompanionMessage(companion.onDecision(decision));
@@ -182,48 +178,10 @@ function renderDecisionStatus(forecast, prepared, liveSession, cfg){
     }
     return;
   }
-  if (!forecast){
-    predictionUI.decision.textContent = "-";
-    return;
-  }
-  try {
-    const selectedModel = forecast.candidateModels.find((model) => model.modelVersion === forecast.modelVersion) || forecast.candidateModels[0];
-    const probabilities = [...selectedModel.probabilities];
-    const candidateStreets = probabilities
-      .slice(0, 12)
-      .map((probability, street) => ({street, probability}))
-      .sort((left, right) => right.probability - left.probability || left.street - right.street)
-      .slice(0, 3)
-      .map((entry) => entry.street);
-    // The decision is evaluated on the pre-stake bankroll, before the wager.
-    const stakeAlreadyPlaced = prepared.wager ? prepared.wager.totalStakeCents : 0;
-    const decision = decideNextAction({
-      bankrollCents: liveSession.state.bankrollCents + stakeAlreadyPlaced,
-      startingBankrollCents: liveSession.state.startingBankrollCents,
-      accumulatedLossCents: sequenceLossCents,
-      progressionStep: liveSession.state.progressionStep,
-      progressionMode: cfg.progression,
-      unitCents: toMinorUnits(cfg.unit),
-      probabilities,
-      currentStreets: prepared.wager?.chosen ?? [],
-      candidateStreets,
-      limits: {
-        stopLossCents: cfg.stopLoss > 0 ? toMinorUnits(cfg.stopLoss) : 0,
-        maxSteps: cfg.maxSteps,
-      },
-      evidenceWeak: evidenceIsWeak(),
-      observationCount: predictionEngine.observationCount,
-      modelVersion: forecast.modelVersion,
-    });
-    predictionUI.decision.textContent = `${decision.action.toUpperCase()} · ${decision.selected.financials ? money(decision.selected.financials.totalStakeCents / 100) : "observe"}`;
-    predictionUI.decision.title = decision.reasons.join(" ");
-    if (decision.action !== lastDecisionAction){
-      setCompanionMessage(companion.onDecision(decision));
-      lastDecisionAction = decision.action;
-    }
-  } catch {
-    predictionUI.decision.textContent = "-";
-  }
+  predictionUI.decision.textContent = prepared.wager
+    ? `LEGACY ${cfg.betType.toUpperCase()} · ${money(prepared.wager.totalStakeCents / 100)}`
+    : "LEGACY NO BET";
+  predictionUI.decision.title = "The legacy configured strategy controls this wager, not BRI. Select BRI Autonomous for evidence-gated BRI wagering.";
 }
 
 function renderPredictionMonitor(){
@@ -341,7 +299,6 @@ function activateResearchTable(profile, {saveCurrent = true} = {}){
       updatedAt: null,
     }));
   }
-  sequenceLossCents = 0;
   lastDecisionAction = null;
   renderPredictionMonitor();
   renderActiveTable();
@@ -622,9 +579,17 @@ function readConfig(){
   if (simulationMode === "bri-autonomous" && betType !== "streets"){
     throw new Error("BRI Autonomous currently requires the Streets bet strategy.");
   }
+  const bankroll = Number(ui.bankroll.value);
+  const unit = Number(ui.unit.value);
+  if (!Number.isFinite(bankroll) || bankroll <= 0 || toMinorUnits(bankroll) <= 0){
+    throw new Error("Starting bankroll must be a positive amount.");
+  }
+  if (!Number.isFinite(unit) || unit <= 0 || toMinorUnits(unit) <= 0){
+    throw new Error("Stake unit must be at least one penny.");
+  }
   return {
-    bankroll: parseFloat(ui.bankroll.value) || 100,
-    unit: parseFloat(ui.unit.value) || 0.2,
+    bankroll,
+    unit,
     sessions: Math.max(1, parseInt(ui.sessions.value, 10)),
     maxSpins: Math.max(1, parseInt(ui.maxSpins.value, 10)),
     simulationMode,
@@ -993,6 +958,9 @@ async function runSimulationLive(){
       const preview = liveSession.previewNextSpin();
       if (preview.action === "stop"){
         const stopped = liveSession.prepareNextSpin();
+        renderDecisionStatus(stopped, cfg);
+        rouletteBoard.updateBets(null);
+        ui.liveBankroll.textContent = money(liveSession.bankroll);
         reason = stopped.reason;
         bankroll = liveSession.bankroll;
         break;
@@ -1009,7 +977,7 @@ async function runSimulationLive(){
         prepared = liveSession.prepareNextSpin();
       }
       const bet = prepared.wager;
-      renderDecisionStatus(forecast, prepared, liveSession, cfg);
+      renderDecisionStatus(prepared, cfg);
 
       if (prepared.action === "stop"){
         reason = prepared.reason;
@@ -1022,6 +990,14 @@ async function runSimulationLive(){
         await recordObservedOutcome(n, activeRemoteSession, prepared.spinNumber, evaluation, prepared);
         rouletteBoard.updateBets(null);
         bankroll = liveSession.bankroll;
+        ui.liveBankroll.textContent = money(bankroll);
+        const profitLoss = liveSession.profitLossCents / 100;
+        ui.liveSessionPL.textContent = (profitLoss >= 0 ? "+" : "") + money(profitLoss);
+        ui.liveSessionPL.className = "value " + (profitLoss >= 0 ? "good" : "bad");
+        ui.wheelNumber.textContent = String(n);
+        ui.wheelNumber.className = `wheel-number ${n === 0 ? "green" : isRed(n) ? "red" : "black"}`;
+        ui.rouletteWheel.classList.remove("win", "lose", "spinning", "settling");
+        rouletteBoard.highlightWinningNumber(n);
         continue;
       }
 
@@ -1084,10 +1060,6 @@ async function runSimulationLive(){
       await sleep(getDelay(basePauseTime));
 
       const win = settlement.hit;
-      if (bet){
-        if (win) sequenceLossCents = Math.max(0, sequenceLossCents - (settlement.grossReturnCents - bet.totalStakeCents));
-        else sequenceLossCents += bet.totalStakeCents;
-      }
       bankroll = settlement.bankroll;
       const currentSessionPL = liveSession.profitLossCents / 100;
 

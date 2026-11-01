@@ -2,21 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script src="assets/js/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Record European roulette results from a physical table, review BRI recommendations and account for wagers you confirm." />
   <meta name="theme-color" content="#101a18" />
   <title>Player Mode | Bank-Roll</title>
   <link rel="stylesheet" href="assets/css/player.css" />
+  <link rel="stylesheet" href="assets/css/site-shell.css" />
+  <link rel="stylesheet" href="assets/css/number-entry.css" />
+  <link rel="stylesheet" href="assets/css/player-focus.css" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="player.html" aria-label="Bank-Roll Player Mode home"><span class="brand-mark">BR</span><span>Bank-Roll</span><small>PLAYER MODE</small></a>
-    <nav aria-label="Other Bank-Roll modes">
-      <a href="index.html">Simulator</a>
-      <a href="test-mode.html">Test</a>
-      <a href="research.html">Research</a>
-      <a href="/faq">FAQ</a>
-    </nav>
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="Bank-Roll home"><span class="site-mark" aria-hidden="true">BR</span>Bank-Roll</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary aria-current="page">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn</a></nav>
+    <a class="site-play-link" href="player.html" aria-current="page">PLAY</a>
+    <label class="theme-control"><span>Theme</span><select data-theme-select aria-label="Colour theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <span class="theme-status" data-theme-status role="status"></span>
+    <details class="site-menu"><summary aria-label="Open main navigation">MENU</summary><nav aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary aria-current="page">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Technical docs</a></nav></details>
   </header>
 
   <main>
@@ -37,8 +41,18 @@
     </section>
 
     <div id="playerWorkspace" hidden>
+      <div class="focus-toolbar" aria-label="Player display">
+        <div class="focus-summary" hidden>
+          <strong id="focusTable"></strong>
+          <span>Bankroll <strong id="focusBankroll"></strong></span>
+          <span>Session P/L <strong id="focusProfit"></strong></span>
+          <span>BRI <strong id="focusAction"></strong></span>
+        </div>
+        <button class="button button-quiet" id="focusModeButton" type="button" aria-pressed="false">Focus Mode</button>
+        <span id="focusStorageStatus" role="status"></span>
+      </div>
       <section class="tablebar" aria-label="Active table and session">
-        <details class="table-controls"><summary>Table: <strong id="activeTableName">Loading</strong> · session controls</summary>
+        <details class="table-controls"><summary>Table: <strong id="activeTableName">Loading</strong> · manage</summary>
         <div class="table-identity">
           <label for="tableSelect">Physical table</label>
           <select id="tableSelect" aria-label="Select physical table"></select>
@@ -58,14 +72,12 @@
       <section class="account-strip" aria-label="Session accounting">
         <div><span class="stat-label">Available bankroll</span><strong id="bankrollValue">£0.00</strong></div>
         <div><span class="stat-label">Session result</span><strong id="profitValue">£0.00</strong></div>
-        <div><span class="stat-label">Actual wagers</span><strong id="wagerRecord">0 · 0</strong><small>won · lost</small></div>
-        <div><span class="stat-label">Unrecovered losses</span><strong id="lossValue">£0.00</strong></div>
       </section>
 
       <div class="player-grid">
         <section class="panel recommendation-panel" aria-labelledby="recommendation-title">
           <div class="panel-heading">
-            <div><p class="eyebrow">CURRENT BRI STRATEGY</p><h2 id="recommendation-title">Observe first · flat baseline</h2></div>
+            <div><p class="eyebrow">BRI RECOMMENDS</p><h2 id="recommendation-title">OBSERVE / NO BET</h2></div>
             <span class="status-pill" id="evidenceStatus">NO FORECAST</span>
           </div>
           <div id="recommendationContent" class="recommendation-content" aria-live="polite">
@@ -77,7 +89,6 @@
             <button class="button button-stop" id="noBetButton" type="button" disabled>Record no bet</button>
           </div>
           <div id="wagerState" class="wager-state" role="status">No wager is awaiting a result.</div>
-          <details class="strategy-rules"><summary>Rules, evidence and session summary</summary><button class="button button-quiet" id="prepareButton" type="button">Refresh next-spin analysis</button><div id="strategyRules"></div><ul id="modelScores"></ul><p id="sessionSummary"></p></details>
         </section>
 
         <section class="panel entry-panel" aria-labelledby="entry-title">
@@ -85,7 +96,7 @@
             <div><p class="eyebrow">HUMAN RESULT ENTRY</p><h2 id="entry-title">Winning number</h2></div>
             <span class="selected-number" id="selectedNumber" aria-live="polite">—</span>
           </div>
-          <div class="roulette-board" id="rouletteBoard" role="group" aria-label="European roulette number keypad"></div>
+          <div class="roulette-board number-entry-board" id="rouletteBoard" role="group" aria-label="European roulette number keypad"></div>
           <div class="entry-footer">
             <button class="button button-primary entry-submit" id="recordOutcomeButton" type="button" disabled>Record result</button>
             <button class="button button-quiet" id="gapButton" type="button">Missed spin</button>
@@ -99,16 +110,22 @@
             <div><p class="eyebrow">CHRONOLOGICAL · CORRECTABLE</p><h2 id="history-title">Recent results</h2></div>
             <span class="history-count" id="historyCount">0 results</span>
           </div>
-          <ol class="history-list" id="historyList"></ol>
-          <details><summary>Observation audit trail</summary><ul id="auditList"></ul></details>
+          <ol id="recentResults" class="recent-results" aria-label="Latest recorded results"></ol>
+          <details class="wager-history"><summary>Detailed results, wagers and corrections</summary><ol class="history-list" id="historyList"></ol></details>
+          <details class="strategy-rules"><summary>Rules, evidence and session summary</summary>
+            <div class="account-detail"><span>Actual wagers <strong id="wagerRecord">0 · 0</strong> won · lost</span><span>Unrecovered losses <strong id="lossValue">£0.00</strong></span></div>
+            <button class="button button-quiet" id="prepareButton" type="button">Refresh next-spin analysis</button>
+            <div id="recommendationDetail"></div><div id="strategyRules"></div><ul id="modelScores"></ul><p id="sessionSummary"></p>
+          </details>
+          <details><summary>Observation integrity and audit trail</summary><p>Human entries are unverified, stored on this device and never shared. Export does not provide a restore workflow.</p><ul id="auditList"></ul></details>
         </section>
       </div>
     </div>
 
-    <footer class="page-footer">
-      <span>European single-zero roulette · 37 outcomes</span>
-      <span>Local data is not synced or backed up</span>
-      <span class="app-version" data-app-version>Version loading</span>
+    <footer class="site-footer">
+      <div class="site-footer-brand"><strong>Bank-Roll · Player Mode</strong><span>European single-zero roulette · 37 outcomes. Forecasts are not guarantees.</span></div>
+      <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/">Home</a><a href="player.html">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Documentation</a></nav>
+      <div class="site-footer-meta">Local data is not synced or backed up.<br /><span data-app-version>Version loading</span></div>
     </footer>
   </main>
 

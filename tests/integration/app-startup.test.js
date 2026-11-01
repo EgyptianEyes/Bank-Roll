@@ -169,15 +169,16 @@ test("app initializes the original board and controls when randomUUID and Web Cr
     await import(`../../src/ui/app.js?startup-without-random-uuid=${Date.now()}`);
 
     const board = getElement("streetGrid");
-    assert.equal(board.children.length, 3, "zero, number grid and chip layer should be built");
+    assert.equal(board.children.length, 2, "zero and number grid should be built");
     assert.equal(board.children[0].textContent, "0");
     const numberGrid = board.children[1];
     const expectedOrder = [];
     for (let row = 0; row < 3; row++){
       for (let column = 0; column < 12; column++) expectedOrder.push(column * 3 + (3 - row));
     }
-    assert.deepEqual(numberGrid.children.map((cell) => Number(cell.textContent)), expectedOrder);
-    assert.equal(board.children[2].children.length, 12, "all street chip holders should be present");
+    assert.deepEqual(numberGrid.children.slice(0, 36).map((cell) => Number(cell.textContent)), expectedOrder);
+    assert.equal(numberGrid.children[36].className, "street-chip-layer");
+    assert.equal(numberGrid.children[36].children.length, 12, "all street chip holders should be present");
     assert.ok(getElement("btnRunStop").listeners.get("click")?.length, "Run/Stop listener should be registered");
     assert.ok(getElement("btnReset").listeners.get("click")?.length, "Reset listener should be registered");
     assert.ok(getElement("btnConfig").listeners.get("click")?.length, "Configuration listener should be registered");

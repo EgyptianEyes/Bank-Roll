@@ -4,7 +4,15 @@ A local-first European roulette player companion, with BRI intelligence, a separ
 
 ## Run and deploy
 
-Open [Player Mode](player.html) to select a physical table, set session limits, confirm actual wagers and enter results. On Apache/cPanel, the packaged `DirectoryIndex` opens Player Mode at the site root; [the preserved simulator](index.html) remains available explicitly. Use `bash scripts/package-cpanel.sh` to prepare the browser-only package; serve over HTTPS. No Node.js production service, paid API or CDN is required. Native ES modules require HTTP(S), not `file://`. No deployment is performed by packaging.
+Start at the mission-led [home page](home.html), then choose [Player Mode](player.html), [the preserved simulator](index.html), Test Mode, Research or Learn. Apache/cPanel opens the home page at the site root. Use `bash scripts/package-cpanel.sh` to prepare the browser-only package; serve over HTTPS. No Node.js production service, paid API or CDN is required. Native ES modules require HTTP(S), not `file://`. No deployment is performed by packaging.
+
+The header's **Theme** control offers Light, Dark and System. First visits follow the operating system; explicit preferences persist locally across pages and browser restarts. Theme changes do not reload the page or change table/session records. See [the visualisation and theme report](BANK-ROLL-THEME-REPORT.md).
+
+Player Mode now prioritises live recommendation, wager status and upright orientation-aware number entry. See [the mobile Player refinement report](BANK-ROLL-MOBILE-PLAYER-REPORT.md) for measurements, regression results and remaining device-testing limitations.
+
+An optional **Focus Mode** keeps the same session and wager workflow while minimising website distractions. Its separate local display preference and measured browser behaviour are documented in [the Focus Mode report](BANK-ROLL-FOCUS-MODE-REPORT.md).
+
+The [final UI verification report](BANK-ROLL-FINAL-UI-REPORT.md) records the UI checkpoint's complete-suite results, exact packaged-browser checks, layout measurements and remaining preview limitations. Later BRI wagering validation is recorded separately below; earlier delivery reports are historical snapshots.
 
 The optional backend described below is excluded from that package and is not production-verified. It requires PHP 8.1+, PDO MySQL and MySQL/MariaDB. Do not enable observed submissions without separate backend verification and server-enforced safeguards.
 
@@ -32,9 +40,11 @@ Current findings, validation and outstanding work are in the [next-stage audit](
 
 ## cPanel ZIP Packaging
 
-Create a browser-only `bank-roll-cpanel.zip` from the current working tree, including uncommitted changes, with `bash scripts/package-cpanel.sh`. The archive contains exactly one top-level `public_html/` directory and is intended to be extracted into the cPanel account home directory. It includes Player Mode, simulator, Test Mode, Worker research, public guides, CSS and ES modules; it excludes PHP/MySQL APIs, migrations and development files. Observed server submissions remain disabled. Every page displays the version from `src/core/version.js` plus a content-derived build ID. Root/transitive module and Worker URLs use that build key; `build-info.json` records SHA-256 hashes, and HTML/assets must revalidate. The script runs page/module checks and verifies the archive before replacing the ZIP. Build identity is deterministic for identical public content; ZIP timestamps may differ. The manual GitHub Actions packaging workflow only uploads an artifact; it does not deploy.
+Create a browser-only `bank-roll-cpanel.zip` from the current working tree, including uncommitted changes, with `bash scripts/package-cpanel.sh`. The archive contains exactly one top-level `public_html/` directory and is intended to be extracted into the cPanel account home directory. It includes the home page, Player Mode, simulator, Test Mode, Worker research, public guides, CSS and ES modules; it excludes PHP/MySQL APIs, migrations and development files. Observed server submissions remain disabled. Every page displays the version from `src/core/version.js` plus a content-derived build ID. Root/transitive module and Worker URLs use that build key; `build-info.json` records SHA-256 hashes, and HTML/assets must revalidate. The script runs page/module checks and verifies the archive before replacing the ZIP. Build identity is deterministic for identical public content; ZIP timestamps may differ. The manual GitHub Actions packaging workflow only uploads an artifact; it does not deploy.
 
 ## Current scope
+
+The [simulator wagering investigation](BANK-ROLL-BRI-WAGERING-REPORT.md) traces the actual legacy and BRI Autonomous execution paths, explains the 20p base unit and configured progression, documents corrected street-limit/display/fallback defects, and provides reproducible pre-result decision and settlement evidence. The cPanel packaging workflow includes these changes when rebuilt; its versioned assets and manifest are verified from the generated archive.
 
 The existing simulator interface and roulette board are retained. Simulated runs offer the original cold-street strategy as the default and a separate BRI Autonomous mode. Autonomous decisions drive the actual street wagers; STOP suspends wagers while the session continues observing. Every proposed wager is independently checked by bankroll accounting, and configured session stop-loss/take-profit limits still apply. The mode uses the central BRI coordinator and the CONTINUE/SWITCH/SPREAD/STOP decision engine with exact exposure projections. When server storage is enabled, forecasts and full decision snapshots are recorded before outcomes and replayed in order from the bounded offline outbox. The prediction model is exploratory and its measured accuracy is reported against the uniform European baseline; it does not establish a betting advantage, and the companion can never influence the mathematics.
 
@@ -43,6 +53,8 @@ The integrity monitor flags contradictions and statistical shift candidates with
 The live research panel now follows every resolved simulator outcome with current-dataset street profiles, a last-100 number-frequency view, forward-scored model summaries, and an in-memory timeline of significant events. It labels the simulator's data as synthetic, distinguishes sample maturity from predictive confidence, and does not claim that calibration or a hypothesis archive exists.
 
 ## Try BRI Safely
+
+Test Mode records each number activation immediately, including consecutive identical results. A 650ms pressed highlight preserves roulette colours; a coloured **Recorded: N** status, observation count and newest-first eight-result strip confirm successful entries. Reduced-motion users receive the same static highlight. Player Mode still requires Select → Confirm.
 
 Open [Test Mode](test-mode.html) to enter any result from 0 to 36 or generate up to 100 seeded random spins per batch (5,000 per temporary session). It runs the real BRI coordinator, prediction engine, decision policies, financial safeguards and optional companion locally in page memory. Its provenance is `test`/synthetic; it makes no server requests, does not use a table ID, and cannot enter live or shared research. A fixed 24-hour deadline is not extended by activity, and **End Test & Discard Results** clears the session immediately. Closing or navigating away discards it. Live human observations remain disabled by default on the PHP server until server-side validation, rate limiting and database tests are verified. Test Mode is separate from the reproducible structured Research Laboratory and the persistent simulated table profiles.
 

@@ -15,6 +15,8 @@ const ui = {
   discard: $("btnDiscardTest"),
   numberPad: $("testNumberPad"),
   lastResult: $("testLastResult"),
+  entryCount: $("testEntryCount"),
+  recentResults: $("testRecentResults"),
   generateOne: $("btnGenerateOne"),
   batchCount: $("testBatchCount"),
   generateBatch: $("btnGenerateBatch"),
@@ -46,7 +48,30 @@ let busy = false;
 let companion = null;
 const streetCells = buildStreetRows();
 const numberButtons = buildNumberPad();
+const pressedTimers = new Map();
 const formatMoney = (cents) => `£${fromMinorUnits(cents).toFixed(2)}`;
+
+function showPressedNumber(number){
+  const button = numberButtons[number];
+  window.clearTimeout(pressedTimers.get(button));
+  button.classList.add("test-number-recorded");
+  pressedTimers.set(button, window.setTimeout(() => {
+    button.classList.remove("test-number-recorded");
+    pressedTimers.delete(button);
+  }, 650));
+}
+
+function clearPressedNumbers(){
+  for (const [button, timer] of pressedTimers){
+    window.clearTimeout(timer);
+    button.classList.remove("test-number-recorded");
+  }
+  pressedTimers.clear();
+}
+
+function resultColour(number){
+  return number === 0 ? "test-result-zero" : isRed(number) ? "test-result-red" : "test-result-black";
+}
 
 function buildNumberPad(){
   const fragment = document.createDocumentFragment();
@@ -56,6 +81,10 @@ function buildNumberPad(){
     button.type = "button";
     button.className = `test-number-button${number === 0 ? " test-number-zero" : isRed(number) ? " test-number-red" : " test-number-black"}`;
     button.textContent = String(number);
+    if (number){
+      button.style.setProperty("--number-column", String((number - 1) % 3 + 1));
+      button.style.setProperty("--number-street", String(Math.ceil(number / 3)));
+    }
     button.setAttribute("aria-label", `Enter roulette result ${number}`);
     button.addEventListener("click", () => submitOutcome(number));
     buttons.push(button);
@@ -99,7 +128,6 @@ function startSession(){
 function submitOutcome(outcome){
   if (!session || busy) return;
   busy = true;
-  setControlsDisabled(true);
   try {
     const {result} = session.recordOutcome(outcome);
     if (result.evaluation){
@@ -113,12 +141,14 @@ function submitOutcome(outcome){
     }
     announcePrepared(session.prepared);
     ui.inputStatus.textContent = `Test result ${outcome} accepted · synthetic test data only`;
-    render();
+    render({recorded: true});
+    if (session) showPressedNumber(outcome);
   } catch (error) {
+    clearPressedNumbers();
+    if (session?.observationCount) ui.lastResult.textContent = `Latest: ${session.outcomes.at(-1)}`;
     ui.inputStatus.textContent = error.message;
   } finally {
     busy = false;
-    setControlsDisabled(false);
   }
 }
 
@@ -142,8 +172,10 @@ function generate(count){
       announcePrepared(session.prepared);
     }
     ui.inputStatus.textContent = `${generated.length} synthetic spin${generated.length === 1 ? "" : "s"} generated · not real-table observations`;
-    render();
+    render({recorded: generated.length > 0});
   } catch (error) {
+    clearPressedNumbers();
+    if (session?.observationCount) ui.lastResult.textContent = `Latest: ${session.outcomes.at(-1)}`;
     ui.inputStatus.textContent = error.message;
   } finally {
     busy = false;
@@ -177,6 +209,7 @@ function correctSelected(){
   const outcome = Number(ui.correctionValue.value);
   try {
     session.correctAt(spinIndex, outcome);
+    clearPressedNumbers();
     ui.inputStatus.textContent = `Test spin ${spinIndex + 1} corrected · forecasts and statistics replayed inside this temporary test only`;
     ui.correctionValue.value = "";
     render();
@@ -192,6 +225,7 @@ function undoLast(){
     return;
   }
   ui.inputStatus.textContent = "Last test result removed · temporary BRI state replayed";
+  clearPressedNumbers();
   render();
 }
 
@@ -199,6 +233,7 @@ function resetSession(){
   if (!session) return;
   try {
     session.reset();
+    clearPressedNumbers();
     companion = new BriCompanion({mode: ui.companionMode.value});
     ui.companionMessage.textContent = "BRI is ready to experiment.";
     ui.inputStatus.textContent = "Test results cleared · the original expiry time is unchanged";
@@ -209,6 +244,7 @@ function resetSession(){
 }
 
 function discardSession({expired = false} = {}){
+  clearPressedNumbers();
   if (session) session.discard();
   session = null;
   companion = null;
@@ -217,6 +253,9 @@ function discardSession({expired = false} = {}){
   ui.wageringMode.disabled = false;
   ui.expiry.textContent = expired ? "Expired · results discarded" : "Test ended · results discarded";
   ui.lastResult.textContent = "No results";
+  ui.lastResult.className = "";
+  ui.entryCount.textContent = "0 observations";
+  ui.recentResults.replaceChildren();
   ui.sessionState.textContent = expired ? "Expired and discarded" : "Discarded";
   ui.inputStatus.textContent = "Temporary outcomes, forecasts, decisions and bankroll have been discarded.";
   ui.spinCount.textContent = "0";
@@ -242,7 +281,7 @@ function discardSession({expired = false} = {}){
   ui.correctionValue.value = "";
 }
 
-function render(){
+function render({recorded = false} = {}){
   if (!session || session.expireIfDue()){
     if (session) discardSession({expired: true});
     return;
@@ -259,7 +298,17 @@ function render(){
 
   ui.sessionState.textContent = `${count.toLocaleString()} / ${session.maxObservations.toLocaleString()} test spins · no real-table data`;
   ui.spinCount.textContent = count.toLocaleString();
-  ui.lastResult.textContent = count ? `Last result ${session.outcomes.at(-1)}` : "No results";
+  const latest = session.outcomes.at(-1);
+  ui.lastResult.textContent = count ? `${recorded ? "Recorded" : "Latest"}: ${latest}` : "No results";
+  ui.lastResult.className = count ? resultColour(latest) : "";
+  ui.entryCount.textContent = `${count.toLocaleString()} observation${count === 1 ? "" : "s"}`;
+  const recent = session.outcomes.slice(-8).reverse().map((number, index) => {
+    const item = newListItem(String(number));
+    item.className = resultColour(number);
+    item.setAttribute("aria-label", `${index === 0 ? "Newest result, " : ""}spin ${count - index}: ${number}`);
+    return item;
+  });
+  ui.recentResults.replaceChildren(...recent);
   ui.forecast.textContent = forecast
     ? forecast.modelVersion === "uniform-v1" ? `Uniform baseline · spin ${forecast.spinNumber}` : `Street ${forecast.street + 1} · spin ${forecast.spinNumber}`
     : "Gathering observations";

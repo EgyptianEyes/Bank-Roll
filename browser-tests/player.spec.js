@@ -39,7 +39,7 @@ test("complete mobile player session, audit, export, table separation and browse
     });
     page.on("dialog", (dialog) => dialog.accept());
     await page.clock.install({time: new Date("2026-10-31T12:00:00Z")});
-    await page.goto("http://127.0.0.1:4178/");
+    await page.goto("http://127.0.0.1:4178/player.html");
     await createTable(page);
     await manual(page, [0]);
     await expect(page.locator("#bankrollValue")).toHaveText("£99.80");
@@ -60,6 +60,7 @@ test("complete mobile player session, audit, export, table separation and browse
     await expect(page.locator("#bankrollValue")).toHaveText("£104.00");
     await expect(page.locator("#historyList li").first()).toContainText("won");
     await expect(page.locator("#historyList li").nth(1)).toContainText("undone · wager reopened");
+    await page.getByText("Detailed results, wagers and corrections", {exact: true}).click();
     await page.locator(".correction-button").first().click();
     await page.locator("#correctionOutcome").selectOption("4");
     await page.locator('#correctionForm [name="reason"]').fill("Correcting entry");
@@ -92,7 +93,7 @@ test("complete mobile player session, audit, export, table separation and browse
     page = await context.newPage();
     page.on("pageerror", (error) => errors.push(error.message));
     page.on("dialog", (dialog) => dialog.accept());
-    await page.goto("http://127.0.0.1:4178/");
+    await page.goto("http://127.0.0.1:4178/player.html");
     await expect(page.locator("#tableSelect option:checked")).toHaveText("Physical table A");
     await expect(page.locator("#bankrollValue")).toHaveText("£104.00");
     await expect(page.locator("#historyList li")).toHaveCount(12);
@@ -134,7 +135,7 @@ for (const width of [320, 375, 390, 430, 768]){
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("dialog", (dialog) => dialog.accept());
-      await page.goto("/");
+      await page.goto("/player.html");
       await createTable(page);
       await result(page, 36);
       if (width === 390 && orientation === "portrait") await page.screenshot({path: "test-results/player-390.png", fullPage: true});

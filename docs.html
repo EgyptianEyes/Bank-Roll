@@ -2,26 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script src="assets/js/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Technical documentation for Bank-Roll's implemented architecture, Test Mode, research methods, data integrity, security boundaries and reproducibility." />
   <meta property="og:title" content="Technical Documentation | Bank-Roll" />
   <meta property="og:description" content="Implementation-accurate guides to Bank-Roll and BRI, with experimental and planned capabilities labelled clearly." />
   <link rel="canonical" href="https://bank-roll.uk/docs" />
   <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <link rel="stylesheet" href="assets/css/site-shell.css" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
   <title>Technical Documentation | Bank-Roll</title>
 </head>
 <body class="knowledge-document">
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="Bank-Roll home"><span class="site-mark" aria-hidden="true">BR</span>Bank-Roll</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html" aria-current="page">Learn</a></nav>
+    <a class="site-play-link" href="player.html">PLAY</a>
+    <label class="theme-control"><span>Theme</span><select data-theme-select aria-label="Colour theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <span class="theme-status" data-theme-status role="status"></span>
+    <details class="site-menu"><summary aria-label="Open main navigation">MENU</summary><nav aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html" aria-current="page">Learn · FAQ</a><a href="docs.html">Technical docs</a></nav></details>
+  </header>
   <div class="knowledge-shell">
-    <header class="research-public-header">
-      <a class="research-brand" href="index.html"><strong>Bank-Roll</strong><span>WINNING STREETS · DOCUMENTATION</span></a>
-      <nav aria-label="Main navigation">
-        <a href="index.html">Laboratory</a>
-        <a href="test-mode.html">Test Mode</a>
-        <a href="faq.html">FAQ</a>
-        <a href="research.html">Research</a>
-      </nav>
-    </header>
-
     <main>
       <header class="knowledge-heading">
         <p class="research-kicker">TECHNICAL REFERENCE · IMPLEMENTED SCOPE</p>
@@ -57,6 +58,12 @@
             <article data-searchable>
               <h3>Requirements</h3>
               <p>The browser application uses HTML, CSS and native JavaScript ES modules. A web server over HTTPS is required; opening the page as a <code>file://</code> URL is not supported. Browser-only simulation and Test Mode do not require a database. Persistent account storage uses PHP 8.1+ with PDO MySQL and MySQL/MariaDB. Node.js is used for development tests and research scripts, not as a production service.</p>
+            </article>
+            <article data-searchable>
+              <h3>Public sections and mobile layout</h3>
+              <p>The site root opens the mission-led home page. The shared navigation separates Play (local physical-table observations), Simulate (the preserved <code>index.html</code> experiment), Test (temporary synthetic data), Research, and Learn (FAQ and this guide). The simulator's traditional betting board keeps its standard number and street mapping; on narrow portrait screens it reflows into twelve readable street rows and returns to the wide layout in landscape. Player and Test Mode use separate number-entry keypads.</p>
+              <p>The header's Theme control offers Light, Dark and System. System follows the operating system, including changes while the page is open. Explicit preferences are saved in localStorage on this browser, independently of table and research records. Switching themes does not reload the page, record an outcome or change a wager.</p>
+              <p>Active Player sessions lead with the table, bankroll, BRI recommendation and confirmed wager status. Player and Test Mode keypads reflow to three columns in portrait and twelve columns in landscape, keeping labels upright. Player selections still require Record result; Test Mode retains its separate temporary direct-entry workflow. Detailed evidence, accounting, wager history and integrity remain expandable below recent results.</p>
             </article>
             <article data-searchable>
               <h3>cPanel installation</h3>
@@ -251,9 +258,10 @@ find server tests/php -name '*.php' -print0 | xargs -0 -n1 php -l</code></pre>
             </article>
           </section>
 
-          <footer class="research-public-footer">
-            <span>Documentation describes the current implementation; planned work is labelled.</span>
-            <a href="index.html">Return to the laboratory</a>
+          <footer class="site-footer">
+            <div class="site-footer-brand"><strong>Bank-Roll · Documentation</strong><span>Implemented scope and planned work are distinguished.</span></div>
+            <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/">Home</a><a href="player.html">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Documentation</a></nav>
+            <div class="site-footer-meta"><span data-app-version>Version loading</span></div>
           </footer>
         </div>
       </div>

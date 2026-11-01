@@ -6,7 +6,7 @@ const root = path.resolve(process.env.BANKROLL_BROWSER_ROOT || ".");
 const types = {".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json"};
 createServer(async (request, response) => {
   const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
-  const relative = pathname === "/" ? "player.html" : ["faq", "docs"].includes(pathname.slice(1)) ? `${pathname.slice(1)}.html` : pathname.slice(1);
+  const relative = pathname === "/" ? "home.html" : ["faq", "docs"].includes(pathname.slice(1)) ? `${pathname.slice(1)}.html` : pathname.slice(1);
   const file = path.resolve(root, relative);
   if (!file.startsWith(root + path.sep)){
     response.writeHead(403).end();

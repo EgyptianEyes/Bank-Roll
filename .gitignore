@@ -9,3 +9,6 @@ test-results/
 playwright-report/
 *.zip
 *.tar.gz
+
+# Local visual review evidence
+/visual-review/

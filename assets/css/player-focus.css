@@ -1,0 +1,47 @@
+.focus-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:4px 0}
+.focus-toolbar .button{min-height:44px}
+#focusStorageStatus{color:var(--bad);font-size:.72rem}
+#focusStorageStatus:empty{display:none}
+.player-focus.session-active header.site-header,
+.player-focus.session-active .site-footer{display:none}
+.player-focus.session-active header.site-header:has(.theme-status:not(:empty)){display:flex}
+.player-focus .focus-toolbar{
+  position:sticky;top:0;z-index:10;
+  background:var(--bg);border-bottom:1px solid var(--stroke);
+  padding:4px 0;flex-wrap:wrap;
+}
+.focus-summary{display:flex;flex-wrap:wrap;gap:3px 12px;flex:1;min-width:0;font-size:.68rem}
+.focus-summary>strong{flex-basis:100%;font-size:.8rem}
+.focus-summary strong{font-variant-numeric:tabular-nums}
+.focus-summary>span{color:var(--muted)}
+.focus-summary>span strong{color:var(--text)}
+.focus-summary .negative{color:var(--bad)}
+.player-focus .account-strip{display:none}
+.player-focus .tablebar{border:0}
+.player-focus .table-controls>summary{min-height:44px;padding:6px 0;font-size:.7rem}
+.player-focus .panel{padding:6px 0}
+.player-focus .recommendation-panel .panel-heading{margin-bottom:3px}
+.player-focus .recommendation-panel .eyebrow{display:none}
+.player-focus .recommendation-panel h2{font-size:1rem}
+.player-focus .recommendation-content{padding:4px 7px}
+.player-focus .recommendation-actions{margin-top:4px}
+.player-focus .wager-state{padding:4px 6px;margin-top:4px}
+.player-focus .entry-panel h2{font-size:1rem}
+.player-focus .entry-panel .selected-number{width:30px}
+.player-focus .entry-panel .panel-heading{margin-bottom:4px}
+.player-focus .entry-panel{scroll-margin-top:90px}
+.player-focus .number-button{scroll-margin-top:90px}
+.player-focus .history-panel .eyebrow{display:none}
+.player-focus .history-panel summary{padding:6px 0}
+@media(orientation:landscape) and (min-width:640px){
+  .player-focus #playerWorkspace{display:block}
+  .player-focus .focus-summary>strong{flex-basis:auto}
+  .player-focus .focus-summary{align-items:center}
+  .player-focus .recommendation-panel .panel-heading{grid-row:1 / span 2}
+}
+@media(min-width:900px) and (orientation:landscape){
+  .player-focus .player-grid{grid-template-columns:minmax(210px,.32fr) minmax(620px,1fr)}
+}
+@media(max-height:300px){
+  .player-focus .focus-toolbar{position:static}
+}

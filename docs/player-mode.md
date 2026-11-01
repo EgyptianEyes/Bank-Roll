@@ -2,9 +2,9 @@
 
 ## Starting and resuming
 
-Player Mode is the default directory page on Apache/cPanel via `DirectoryIndex player.html index.html`. Other static servers may require opening `player.html` explicitly. The simulator's existing `index.html` URL, desktop design and board remain available.
+The site root opens the mission-led home page via `DirectoryIndex home.html player.html index.html`. Choose **Play** or open `player.html` directly to use Player Mode. The simulator's existing `index.html` URL and board remain available.
 
-Create a physical table profile, set the starting bankroll, unit, maximum total stake, stop-loss, take-profit and optional progression. Open **Table: ... / session controls** to explicitly switch tables, start a fresh session, end a session, record an observer handover or export.
+Create a physical table profile, set the starting bankroll, unit, maximum total stake, stop-loss, take-profit and optional progression. Open **Table: ... / manage** to explicitly switch tables, start a fresh session, end a session, record an observer handover or export.
 
 Selecting another dropdown option does not activate it. **Switch Table** requires confirmation. Actual unsettled wagers block switching, new sessions and ending. Profiles and all their session histories survive browser restarts in IndexedDB; they are not synced. A new session can use different bankroll limits without deleting earlier observations.
 
@@ -12,13 +12,27 @@ On resume, explicitly confirm whether every spin was observed; declining records
 
 ## Each spin
 
-1. Read **CURRENT BRI STRATEGY** and the proposed streets/stakes.
+1. Read **BRI RECOMMENDS**: **BET (exploratory)**, **OBSERVE / NO BET**, or **STOP** at a financial limit or ended session. Proposed streets, covered numbers, stakes and progression are not actual wagers.
 2. Confirm the recommendation, enter an actual manual street wager, or record no bet. A recommendation never debits money.
 3. Select the winning number on the 0-36 keypad, then **Record result**.
 4. The confirmed actual wager settles; a result without one leaves money unchanged.
 5. The interface prepares and persists the next forecast before its outcome is entered. Forecasting begins after ten eligible observations.
 
 An outstanding choice is required before submitting the next result. Manual wagers are still permitted when BRI recommends observation, but cannot bypass financial/session limits. This records the human's decision; it is not an endorsement.
+
+### Mobile playing layout
+
+**Focus Mode** is an optional display control during a loaded session. It hides ordinary site branding/navigation and the footer, keeps a small sticky table/bankroll/session P/L/BRI summary, and reduces secondary spacing. **Exit Focus Mode** restores the ordinary website interface. Wager controls, table/session management, export, corrections, Undo and expandable evidence/history remain available inside Focus Mode. The separate `bank-roll-player-focus` localStorage preference does not write IndexedDB, change sessions or confirm wagers/results. Blocked display storage is visibly reported; the current-page toggle still works.
+
+The focus summary follows existing rendered values, not another calculation or forecasting engine. Sticky status becomes non-sticky in viewports below 300px high (such as a small keyboard-reduced window). All numbers retain their existing 44px targets; portrait still requires some natural scrolling. See [Focus Mode measurements and verification](../BANK-ROLL-FOCUS-MODE-REPORT.md).
+
+Once a table session is loaded, the introduction disappears and the table name, available bankroll, session result, concise recommendation and actual wager status lead directly into number entry. Full explanations, scores, accounting detail, integrity information and detailed wager history are collapsed below the latest-results strip. Tap a recent result to open its history; corrections and **Undo last** retain the existing append-only accounting behaviour.
+
+The Player and Test Mode keypads share presentation only. Portrait uses zero above twelve rows of three numbers (1-2-3, 4-5-6, etc.). Landscape at 640px and wider uses zero on the left and twelve columns, with rows 3/2/1 from top to bottom. Wide desktop uses the horizontal layout too. CSS reflows without rotating text, rebuilding buttons, submitting outcomes or changing the table, wager or selection. Keys measure at least 44 by 44 CSS pixels in the tested viewport matrix.
+
+At 900px and wider in landscape, BRI and number entry sit side by side. Narrower landscape uses a compact status/recommendation strip above the full-width keypad so twelve columns can retain comfortable targets. Portrait's twelve 44px rows necessarily extend below short phone viewports; normal vertical scrolling remains, with no sticky overlay obscuring numbers. See [the mobile refinement report](../BANK-ROLL-MOBILE-PLAYER-REPORT.md) for measured distances and browser-only testing limitations.
+
+Selecting a Player number never records it. **Record result N** explicitly confirms that selection. Changing orientation preserves it; reloading intentionally clears an unrecorded selection while restoring persisted sessions and actual pending wagers. **No Bet confirmed** appears only for the store's explicit `player-no-bet` state, not its default no-wager state. Test Mode retains its existing direct-entry behaviour and strictly separate temporary dataset.
 
 ## Reproducing the rules
 

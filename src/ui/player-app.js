@@ -4,6 +4,7 @@ import {PlayerSession} from "../simulation/player-session.js";
 import {PlayerModeStore} from "../storage/player-mode-store.js";
 import {playerStopReason} from "../simulation/player-rules.js";
 import {wagerOutcomeStatus} from "./player-history.js";
+import "./player-focus.js";
 
 const $ = (id) => document.getElementById(id);
 const ui = {
@@ -22,6 +23,8 @@ const ui = {
   losses: $("lossValue"),
   evidence: $("evidenceStatus"),
   recommendation: $("recommendationContent"),
+  recommendationDetail: $("recommendationDetail"),
+  recentResults: $("recentResults"),
   prepare: $("prepareButton"),
   confirmRecommendation: $("confirmRecommendationButton"),
   manualWager: $("manualWagerButton"),
@@ -81,12 +84,17 @@ function buildNumberPad(){
     button.type = "button";
     button.className = `number-button${number === 0 ? " number-zero" : isRed(number) ? " number-red" : " number-black"}`;
     button.textContent = String(number);
+    if (number){
+      button.style.setProperty("--number-column", String((number - 1) % 3 + 1));
+      button.style.setProperty("--number-street", String(Math.ceil(number / 3)));
+    }
     button.setAttribute("aria-label", `Select winning number ${number}`);
     button.setAttribute("aria-pressed", "false");
     button.addEventListener("click", () => {
       selectedNumber = number;
       ui.board.querySelectorAll("button").forEach((key) => key.setAttribute("aria-pressed", String(key === button)));
       ui.selectedNumber.textContent = String(number);
+      ui.recordOutcome.textContent = `Record result ${number}`;
       ui.recordOutcome.disabled = !session || session.status !== "active" || session.wagerStatus === "awaiting-player" || busy;
     });
     fragment.append(button);
@@ -137,18 +145,23 @@ function renderTableMeta(){
 
 function renderRecommendation(){
   ui.recommendation.replaceChildren();
+  ui.recommendationDetail.replaceChildren();
+  const stopping = session && playerStopReason(session);
+  ui.strategyTitle.textContent = stopping || session?.status !== "active" ? "STOP" :
+    session?.pendingRecommendation?.decision.action !== "stop" && session?.pendingRecommendation ? "BET · exploratory" : "OBSERVE / NO BET";
   const recommendation = session?.pendingRecommendation;
   const forecast = session?.pendingForecast;
+  ui.confirmRecommendation.hidden = !recommendation || recommendation.decision.action === "stop";
   if (!recommendation){
     ui.evidence.textContent = "NO FORECAST";
     ui.confirmRecommendation.disabled = true;
     ui.noBet.disabled = !session || session.status !== "active" || Boolean(session.pendingActualWager) || busy;
     const copy = document.createElement("p");
     copy.className = "empty-copy";
-    copy.textContent = session?.status !== "active"
+    copy.textContent = stopping ? `Risk limit: ${stopping}. No further wagers.` : session?.status !== "active"
       ? "This session is ended. Start a new session to continue."
       : player?.engine.observationCount < 10
-      ? `Observation only: ${player.engine.observationCount} of 10 results recorded before a forecast can be prepared.`
+      ? `Observe: ${player.engine.observationCount} of 10 results before the first forecast.`
       : "Prepare the next forecast before the result is known.";
     ui.recommendation.append(copy);
     return;
@@ -177,7 +190,13 @@ function renderRecommendation(){
     const losses = session.accumulatedLossCents > 0 ? ` £${fromMinorUnits(session.accumulatedLossCents).toFixed(2)} remains unrecovered.` : "";
     explanation.textContent = `BRI's preferred strategy remains observation; this is an exploratory candidate, not an evidence-backed staking strategy. ${decision.reasons[0]} ${progression}: ${streetText}; total ${money(financials.totalStakeCents)}.${losses} Confirm only if this matches your actual wager.`;
   }
-  ui.recommendation.append(title, explanation);
+  const brief = document.createElement("p");
+  brief.className = "empty-copy";
+  brief.textContent = stopping ? `Risk limit: ${stopping}. No further wagers.` : isStop
+    ? "No qualified wager. Keep observing; no advantage is established."
+    : `${selected.streets.map((street, index) => `${street * 3 + 1}-${street * 3 + 3}: ${money(selected.financials.streetStakeCents[index])}`).join(" · ")}. Total ${money(selected.financials.totalStakeCents)}; ${session.settings.progressionMode}, step ${selected.step}. Not yet wagered.`;
+  ui.recommendation.append(brief);
+  ui.recommendationDetail.append(title, explanation);
   ui.confirmRecommendation.disabled = isStop || !selected?.financials || Boolean(session.pendingActualWager) || busy;
   ui.noBet.disabled = Boolean(session.pendingActualWager) || busy;
   if (forecast){
@@ -185,7 +204,7 @@ function renderRecommendation(){
     model.className = "forecast-detail";
     const selectedModel = forecast.candidateModels.find((candidate) => candidate.modelVersion === forecast.modelVersion);
     model.textContent = `${forecast.observationCount} observations · ${forecast.modelVersion} · leading street probability ${(selectedModel.probabilities[forecast.street] * 100).toFixed(2)}% · forward-tested against uniform`;
-    ui.recommendation.append(model);
+    ui.recommendationDetail.append(model);
   }
 }
 
@@ -195,7 +214,6 @@ function renderIntelligence(){
   const selected = recommendation?.decision.selected;
   const stopping = playerStopReason(session);
   const betting = selected && selected.action !== "stop" && !stopping;
-  ui.strategyTitle.textContent = "BRI preferred strategy: Observe";
   const progression = {
     flat: "Keep one unit per street; losses never increase the unit.",
     linear: "At step n propose n units per street.",
@@ -225,6 +243,20 @@ function renderIntelligence(){
 
 function renderHistory(){
   const rows = player.observations;
+  ui.recentResults.replaceChildren(...rows.slice(-8).reverse().map((record) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `recent-result${record.voided ? "" : record.effectiveOutcome === 0 ? " number-zero" : isRed(record.effectiveOutcome) ? " number-red" : " number-black"}`;
+    button.textContent = record.voided ? "Undo" : String(record.effectiveOutcome);
+    button.setAttribute("aria-label", `View entry ${record.sequence}${record.voided ? ", undone" : `, result ${record.effectiveOutcome}`}${record.corrections?.length ? ", corrected" : ""}`);
+    button.addEventListener("click", () => {
+      document.querySelector(".wager-history").open = true;
+      ui.history.scrollIntoView({block: "nearest"});
+    });
+    item.append(button);
+    return item;
+  }));
   ui.historyCount.textContent = `${rows.length} ${rows.length === 1 ? "result" : "results"}`;
   const fragment = document.createDocumentFragment();
   for (const record of rows.slice(-60).reverse()){
@@ -236,7 +268,7 @@ function renderHistory(){
     const detail = document.createElement("div");
     detail.className = "history-detail";
     const heading = document.createElement("strong");
-    heading.textContent = `Entry ${record.sequence}${record.gapBefore ? " · after gap" : ""}${record.voided ? " · undone" : ""}${record.trustStatus === "quarantined" ? " · quarantined" : ""}`;
+    heading.textContent = `Entry ${record.sequence}${record.gapBefore ? " · after gap" : ""}${record.voided ? " · undone" : record.corrections?.length ? " · corrected" : ""}${record.trustStatus === "quarantined" ? " · quarantined" : ""}`;
     const summary = document.createElement("small");
     const actual = record.actualWager;
     if (!actual){
@@ -279,8 +311,9 @@ function render(){
   ui.setupPanel.hidden = true;
   renderTableMeta();
   ui.bankroll.textContent = money(session.bankrollCents);
-  ui.profit.textContent = money(session.bankrollCents + (session.pendingActualWager?.totalStakeCents || 0) - session.startingBankrollCents);
-  ui.profit.classList.toggle("negative", session.bankrollCents < session.startingBankrollCents);
+  const profitCents = session.bankrollCents + (session.pendingActualWager?.totalStakeCents || 0) - session.startingBankrollCents;
+  ui.profit.textContent = money(profitCents);
+  ui.profit.classList.toggle("negative", profitCents < 0);
   ui.wagerRecord.textContent = `${session.wins} · ${session.losses}`;
   ui.losses.textContent = money(session.accumulatedLossCents);
   const active = session.status === "active";
@@ -295,15 +328,21 @@ function render(){
   ui.endSession.disabled = !active || pendingWager || busy;
   ui.gap.disabled = !active || pendingWager || busy;
   ui.recordOutcome.disabled = selectedNumber === null || !active || session.wagerStatus === "awaiting-player" || busy;
-  ui.board.querySelectorAll("button").forEach((button) => { button.disabled = !active || busy; });
+  ui.board.querySelectorAll("button").forEach((button) => {
+    button.disabled = !active || busy;
+    button.setAttribute("aria-pressed", String(selectedNumber === Number(button.textContent)));
+  });
   ui.wagerState.textContent = !active ? "Session ended. Start a new session to continue recording." : pendingWager
-    ? `Confirmed ${money(session.pendingActualWager.totalStakeCents)} on ${session.pendingActualWager.chosen.map((street) => `street ${street + 1}`).join(", ")}. Enter the observed result to settle this wager.`
+    ? `${session.pendingActualWager.origin === "bri-recommendation" ? "Confirmed BRI wager" : "Confirmed manual wager"}: ${money(session.pendingActualWager.totalStakeCents)} on ${session.pendingActualWager.chosen.map((street) => `${street * 3 + 1}-${street * 3 + 3}`).join(", ")}. Awaiting result.`
     : session.wagerStatus === "awaiting-player"
       ? "Choose Confirm BRI wager or Record no bet before entering the winning number."
-      : "No confirmed wager. Only actual bets change your bankroll.";
+      : session.wagerStatus === "player-no-bet" ? "No Bet confirmed. Select the winning number, then Record result."
+      : "No wager confirmed. Choose a wager or Record no bet.";
+  ui.recordOutcome.textContent = selectedNumber === null ? "Record result" : `Record result ${selectedNumber}`;
   renderRecommendation();
   ui.confirmRecommendation.disabled ||= !active;
   ui.noBet.disabled ||= !active;
+  ui.confirmRecommendation.disabled ||= Boolean(playerStopReason(session));
   renderIntelligence();
   renderHistory();
 }
@@ -570,6 +609,9 @@ ui.undo.addEventListener("click", () => {
     await player.undoLastOutcome();
     if (!player.session.pendingActualWager) await player.prepareRecommendation();
     session = player.session;
+    ui.entryStatus.textContent = session.pendingActualWager
+      ? "Last result undone. Confirmed wager reopened; select its correct result."
+      : "Last result undone. Original entry retained in the audit trail.";
   });
 });
 ui.handover.addEventListener("click", () => {

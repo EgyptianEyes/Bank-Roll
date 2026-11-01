@@ -32,6 +32,8 @@ export class RouletteBoard{
         if (number !== 0) cell.classList.add(this.isRed(number) ? "red" : "black");
         if (row < 2) cell.classList.add("faded");
         cell.textContent = String(number);
+        cell.style.setProperty("--classic-row", String(row + 1));
+        cell.style.setProperty("--classic-column", String(col + 1));
         this.numberCells[number] = cell;
         numberGrid.appendChild(cell);
       }
@@ -42,12 +44,12 @@ export class RouletteBoard{
     for (let col = 0; col < 12; col++){
       const holder = document.createElement("div");
       holder.className = "street-chip-holder";
-      holder.style.gridColumn = String(col + 1);
-      holder.style.gridRow = "3";
+      holder.style.setProperty("--street-index", String(col + 1));
       chipLayer.appendChild(holder);
       this.streetCells.push({holder});
     }
-    this.container.append(zero, numberGrid, chipLayer);
+    numberGrid.appendChild(chipLayer);
+    this.container.append(zero, numberGrid);
   }
 
   clearChips(){

@@ -7,7 +7,7 @@ if [[ "$OUTPUT" != /* ]]; then OUTPUT="$ROOT/$OUTPUT"; fi
 OUTPUT_DIR="$(dirname "$OUTPUT")"
 mkdir -p "$OUTPUT_DIR"
 
-for required in .htaccess index.html research.html test-mode.html player.html faq.html docs.html assets src; do
+for required in .htaccess home.html index.html research.html test-mode.html player.html faq.html docs.html assets src; do
   if [[ ! -e "$ROOT/$required" ]]; then
     printf 'Required public file or directory is missing: %s\n' "$required" >&2
     exit 1
@@ -29,7 +29,7 @@ STAGING="$(mktemp -d)"
 trap 'rm -rf "$STAGING"' EXIT
 PUBLIC="$STAGING/public_html"
 mkdir -p "$PUBLIC"
-cp -a "$ROOT/.htaccess" "$ROOT/index.html" "$ROOT/research.html" "$ROOT/test-mode.html" "$ROOT/faq.html" "$ROOT/docs.html" "$PUBLIC/"
+cp -a "$ROOT/.htaccess" "$ROOT/home.html" "$ROOT/index.html" "$ROOT/research.html" "$ROOT/test-mode.html" "$ROOT/faq.html" "$ROOT/docs.html" "$PUBLIC/"
 cp -a "$ROOT/player.html" "$PUBLIC/"
 cp -a "$ROOT/assets" "$ROOT/src" "$PUBLIC/"
 node "$ROOT/scripts/version-cpanel-assets.mjs" "$PUBLIC"

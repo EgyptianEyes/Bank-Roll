@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <script src="assets/js/theme.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b100d" />
+  <meta name="description" content="Bank-Roll investigates whether carefully recorded roulette observations, statistical analysis and adaptive decisions reveal anything useful beyond chance." />
+  <title>Bank-Roll | Observe. Test. Learn.</title>
+  <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <link rel="stylesheet" href="assets/css/site-shell.css" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
+</head>
+<body class="home-page">
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="Bank-Roll home"><span class="site-mark" aria-hidden="true">BR</span>Bank-Roll</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/" aria-current="page">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn</a>
+    </nav>
+    <a class="site-play-link" href="player.html">PLAY</a>
+    <label class="theme-control"><span>Theme</span><select data-theme-select aria-label="Colour theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <span class="theme-status" data-theme-status role="status"></span>
+    <details class="site-menu">
+      <summary aria-label="Open main navigation">MENU</summary>
+      <nav aria-label="Main navigation">
+        <a href="/" aria-current="page">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Technical docs</a>
+      </nav>
+    </details>
+  </header>
+
+  <main>
+    <section class="home-shell home-hero" aria-labelledby="homeTitle">
+      <div>
+        <p class="home-kicker">A EUROPEAN ROULETTE RESEARCH PROJECT</p>
+        <h1 id="homeTitle">Can the evidence reveal what <em>instinct misses?</em></h1>
+        <p class="home-hero-copy">Bank-Roll records roulette observations, tests forecasts before outcomes are known and measures what survives scrutiny. It is an experiment in careful reasoning about chance—not a promise that roulette can be beaten.</p>
+        <div class="home-actions">
+          <a class="home-action home-action-primary" href="player.html">START PLAYING <span aria-hidden="true">&nbsp;→</span></a>
+          <a class="home-action" href="research.html">EXPLORE BRI</a>
+        </div>
+      </div>
+      <aside class="home-proof" aria-labelledby="processTitle">
+        <span class="home-proof-caption">BANK-ROLL INTELLIGENCE · THE PROCESS</span>
+        <h2 id="processTitle">Observe → Predict → Evaluate</h2>
+        <ol class="research-process">
+          <li><span class="process-index" aria-hidden="true">01</span><div><h3>Observe</h3><p>Record outcomes in order. Analyse the accumulated observations.</p><div class="process-outcomes" aria-label="Illustrative outcomes only: 0 green, 1 red, 2 black"><span class="outcome-green">0</span><span class="outcome-red">1</span><span class="outcome-black">2</span><small>Example only · not table data</small></div></div></li>
+          <li><span class="process-index" aria-hidden="true">02</span><div><h3>Predict</h3><p>Record a probability forecast <strong>before</strong> the next outcome is known.</p><div class="process-record"><span>Forecast recorded</span><span aria-hidden="true">→</span><span>Next outcome unknown</span></div></div></li>
+          <li><span class="process-index" aria-hidden="true">03</span><div><h3>Evaluate</h3><p>Compare the forecast with the actual result. Score performance over time against a uniform-wheel baseline.</p><span class="process-baseline">Fair-wheel street baseline: 3 / 37</span></div></li>
+        </ol>
+        <p class="home-proof-note">A forecast is testable. An advantage still has to be demonstrated.</p>
+      </aside>
+    </section>
+
+    <section class="home-shell home-section" id="why" aria-labelledby="whyTitle">
+      <p class="home-index">01 / WHY BANK-ROLL</p>
+      <div class="home-section-content">
+        <h2>Streaks feel meaningful. Evidence has to earn that meaning.</h2>
+        <p>Roulette invites intuition: a number looks overdue, a street seems hot, a memorable run feels like a signal. But random sequences naturally contain clusters and gaps. Looking backwards can make noise look persuasive.</p>
+        <p>We built Bank-Roll to ask a harder question: can carefully recorded outcomes and fair, forward-looking tests identify information a human player would otherwise miss—or does the apparent pattern disappear when measured properly?</p>
+      </div>
+    </section>
+
+    <section class="home-shell home-section" id="bri" aria-labelledby="briTitle">
+      <p class="home-index">02 / MEET BRI</p>
+      <div class="home-section-content">
+        <h2>Intelligence that keeps its working visible.</h2>
+        <p>Bank-Roll Intelligence (BRI) is the software behind the observations, forecasts and decisions. Its job is not to sound certain; it is to compare ideas, show the evidence they have and make the limits clear.</p>
+        <div class="home-cards">
+          <article class="home-card"><span class="home-card-label">01 · OBSERVE</span><h3>Record the next result</h3><p>Keep ordered outcomes and their source distinct: human observations, simulator outcomes and temporary test data are not interchangeable.</p></article>
+          <article class="home-card"><span class="home-card-label">02 · EVALUATE</span><h3>Forecast, then score</h3><p>BRI stores a forecast before the next outcome, scores it afterwards and compares fixed models with a uniform-wheel baseline.</p></article>
+          <article class="home-card"><span class="home-card-label">03 · DISCLOSE</span><h3>Recommend with restraint</h3><p>When evidence is weak or sparse, BRI can recommend observation. A forecast is not a guaranteed edge or an instruction to bet.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-shell home-section" id="play" aria-labelledby="playTitle">
+      <p class="home-index">03 / AT THE TABLE</p>
+      <div class="home-section-content">
+        <h2>For the player who wants a better record, not a louder hunch.</h2>
+        <p>At a physical table, you watch the wheel and enter the winning number. Bank-Roll records the observation locally, updates BRI's assessment and shows any proposed wager for you to review. You decide whether to act; Bank-Roll never places a bet automatically.</p>
+        <div class="home-steps" aria-label="Player Mode workflow">
+          <div class="home-step">Observe the wheel and select its result.</div>
+          <div class="home-step">Confirm the result to update the record.</div>
+          <div class="home-step">Review BRI's evidence and any proposal.</div>
+          <div class="home-step">Choose for yourself; track confirmed wagers.</div>
+        </div>
+        <p class="home-note">Player Mode records are stored in this browser on this device. They are not synced, backed up or independently verified.</p>
+      </div>
+    </section>
+
+    <section class="home-shell home-section" id="laboratories" aria-labelledby="laboratoriesTitle">
+      <p class="home-index">04 / TESTING GROUNDS</p>
+      <div class="home-section-content">
+        <h2>Experiments help us test the software—not prove the wheel.</h2>
+        <p>The simulator makes repeatable, seeded experiments possible. Test Mode lets you explore manual or generated sequences in an isolated temporary session. Research tools compare strategies and forecasting models under stated assumptions.</p>
+        <div class="home-cards">
+          <article class="home-card"><span class="home-card-label">SIMULATE</span><h3>Reproducible runs</h3><p>Explore European roulette and risk using synthetic sequences and explicit settings.</p><a class="home-card-link" href="index.html">Open simulator →</a></article>
+          <article class="home-card"><span class="home-card-label">TEST</span><h3>Try a sequence</h3><p>Exercise BRI with temporary entries; test outcomes never become live-table research.</p><a class="home-card-link" href="test-mode.html">Open Test Mode →</a></article>
+          <article class="home-card"><span class="home-card-label">RESEARCH</span><h3>Inspect the method</h3><p>Read the mathematical baseline, current evidence and the open limitations.</p><a class="home-card-link" href="research.html">Read the research →</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-shell home-section" id="evidence" aria-labelledby="evidenceTitle">
+      <p class="home-index">05 / WHAT WE KNOW</p>
+      <div class="home-section-content">
+        <h2>What has been tested—and what has not.</h2>
+        <p>BRI evaluates a fixed family of forecasting models using forecasts recorded before outcomes and scores them afterwards. Simulations can test accounting, repeatability and behaviour under synthetic assumptions. Those are useful checks, not proof of a real-world advantage.</p>
+        <div class="home-evidence" aria-label="Current research status">
+          <div><strong>37</strong><span>equally likely outcomes in the ideal European-wheel model</span></div>
+          <div><strong>12</strong><span>three-number streets in the standard betting layout</span></div>
+          <div><strong>0</strong><span>verified live-wheel advantages established by this project</span></div>
+        </div>
+        <p class="home-note">No real-wheel bias, profitable strategy or independently validated live prediction advantage has been established. A better historical score is not, by itself, evidence of future profit.</p>
+        <a class="home-card-link" href="research.html">See the research and limitations →</a>
+      </div>
+    </section>
+
+    <section class="home-shell home-section home-cta" aria-labelledby="nextTitle">
+      <p class="home-index">06 / THE CONTINUING EXPERIMENT</p>
+      <div class="home-section-content">
+        <h2 id="nextTitle">A question worth testing carefully.</h2>
+        <p>Bank-Roll is an evolving research project. Models and decisions remain open to evaluation; genuine progress depends on eligible observations, transparent methods and evidence that holds up beyond the data that inspired a hypothesis.</p>
+        <div class="home-actions">
+          <a class="home-action home-action-primary" href="player.html">PLAY · RECORD OBSERVATIONS</a>
+          <a class="home-action" href="index.html">SIMULATE</a>
+          <a class="home-action" href="research.html">EXPLORE THE EVIDENCE</a>
+          <a class="home-action" href="docs.html">LEARN HOW IT WORKS</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer-brand"><strong>Bank-Roll</strong><span>Research, not a promise of profit. Roulette retains its house edge under the fair-wheel model.</span></div>
+    <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/">Home</a><a href="player.html">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Documentation</a></nav>
+    <div class="site-footer-meta">Player records stay in this browser.<br /><span data-app-version>Version loading</span></div>
+  </footer>
+  <script type="module" src="src/ui/version-label.js"></script>
+</body>
+</html>

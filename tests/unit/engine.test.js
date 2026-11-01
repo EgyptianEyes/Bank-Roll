@@ -380,7 +380,7 @@ test("roulette board keeps its original 3x12 order, chip layer and highlights", 
   class Element{
     constructor(){
       this.children = [];
-      this.style = {};
+      this.style = {setProperty(name, value){ this[name] = value; }};
       this.textContent = "";
       this.className = "";
       this.classNames = new Set();
@@ -406,11 +406,13 @@ test("roulette board keeps its original 3x12 order, chip layer and highlights", 
       fromMinorUnits: (value) => value / 100,
     });
     board.build();
-    assert.deepEqual(container.children[1].children.slice(0, 12).map((cell) => cell.textContent), [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36].map(String));
-    assert.equal(container.children[2].children.length, 12);
-    assert.equal(container.children[2].children[11].style.gridColumn, "12");
+    const numberGrid = container.children[1];
+    const chipLayer = numberGrid.children.at(-1);
+    assert.deepEqual(numberGrid.children.slice(0, 12).map((cell) => cell.textContent), [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36].map(String));
+    assert.equal(chipLayer.children.length, 12);
+    assert.equal(chipLayer.children[11].style["--street-index"], "12");
     board.updateBets({kind: "streets", chosen: [0], stakeUnits: 1, perStreetStakeCents: 20});
-    assert.equal(container.children[2].children[0].children[0].children[0].textContent, "20p");
+    assert.equal(chipLayer.children[0].children[0].children[0].textContent, "20p");
     board.highlightWinningNumber(4);
     assert.equal(board.numberCells[4].classList.contains("winner"), true);
     assert.equal(board.numberCells[4].classList.contains("street-winner"), true);

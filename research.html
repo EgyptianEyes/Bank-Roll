@@ -2,38 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script src="assets/js/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="How Bank-Roll investigates European roulette, BRI's forecasting methods, the mathematics of street betting and the limits of current evidence." />
   <meta property="og:title" content="Bank-Roll | Research and Method" />
   <meta property="og:description" content="A transparent guide to Bank-Roll's European roulette simulator, BRI models, mathematics and research limitations." />
   <link rel="canonical" href="https://bank-roll.uk/research.html" />
   <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <link rel="stylesheet" href="assets/css/site-shell.css" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
   <title>Research and Method | Bank-Roll</title>
 </head>
 <body class="research-document">
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="Bank-Roll home"><span class="site-mark" aria-hidden="true">BR</span>Bank-Roll</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html" aria-current="page">Research</a><a href="faq.html">Learn</a></nav>
+    <a class="site-play-link" href="player.html">PLAY</a>
+    <label class="theme-control"><span>Theme</span><select data-theme-select aria-label="Colour theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <span class="theme-status" data-theme-status role="status"></span>
+    <details class="site-menu"><summary aria-label="Open main navigation">MENU</summary><nav aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html" aria-current="page">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Technical docs</a></nav></details>
+  </header>
   <div class="research-document-shell">
-    <header class="research-public-header">
-      <a class="research-brand" href="index.html">
-        <strong>Bank-Roll</strong>
-        <span>WINNING STREETS · RESEARCH</span>
-      </a>
-      <nav aria-label="Main navigation">
-        <a href="index.html">Laboratory</a>
-        <a href="player.html">Player Mode</a>
-        <a href="test-mode.html">Try BRI</a>
-        <a href="/faq">FAQ</a>
-        <a href="#method">Method</a>
-        <a href="#limits">Limitations</a>
-        <span class="app-version" data-app-version>Version loading</span>
-      </nav>
-    </header>
-
     <main>
       <section class="research-public-hero" aria-labelledby="pageTitle">
         <p class="research-kicker">EUROPEAN ROULETTE · COMPUTATIONAL RESEARCH</p>
         <h1 id="pageTitle">Winning Streets.</h1>
         <p class="research-public-lede">Bank-Roll is a research project investigating roulette street strategies, probability and whether recorded outcomes can support better forecasts. BRI, the Bank-Roll Intelligence layer, tests ideas against a uniform European-wheel baseline and keeps uncertainty visible.</p>
-        <a class="research-primary-link" href="index.html">Open the laboratory <span aria-hidden="true">→</span></a>
+        <a class="research-primary-link" href="index.html">Open the simulator <span aria-hidden="true">→</span></a>
         <div class="research-public-facts" aria-label="Research principles">
           <div><strong>37</strong><span>European outcomes</span></div>
           <div><strong>12</strong><span>number streets</span></div>
@@ -113,9 +108,10 @@
         </div>
       </section>
 
-      <footer class="research-public-footer">
-        <span>Bank-Roll · Research, not a promise of profit.</span>
-        <a href="index.html">Return to the laboratory</a>
+      <footer class="site-footer">
+        <div class="site-footer-brand"><strong>Bank-Roll · Research</strong><span>Evidence, estimates and hypotheses are labelled separately.</span></div>
+        <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/">Home</a><a href="player.html">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Documentation</a></nav>
+        <div class="site-footer-meta"><span data-app-version>Version loading</span></div>
       </footer>
     </main>
   </div>

@@ -26,7 +26,7 @@ export function stakeForStep(step, mode){
     case "linear": units = step; break;
     case "martingale": units = 2 ** (step - 1); break;
     case "fibo": units = fibonacciAt(step); break;
-    default: units = 1; break;
+    default: throw new RangeError(`Unsupported progression mode: ${mode}`);
   }
   if (!Number.isSafeInteger(units)) throw new RangeError("Progression stake exceeds the safe integer range.");
   return units;

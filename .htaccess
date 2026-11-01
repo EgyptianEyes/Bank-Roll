@@ -1,5 +1,5 @@
 Options -Indexes
-DirectoryIndex player.html index.html
+DirectoryIndex home.html player.html index.html
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"

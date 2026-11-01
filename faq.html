@@ -2,26 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script src="assets/js/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Answers about Bank-Roll, BRI, roulette street mathematics, forecasting, research modes, privacy and what remains unproven." />
   <meta property="og:title" content="Frequently Asked Questions | Bank-Roll" />
   <meta property="og:description" content="Understand Bank-Roll's roulette research, BRI's methods, the mathematics and the limitations." />
   <link rel="canonical" href="https://bank-roll.uk/faq" />
   <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <link rel="stylesheet" href="assets/css/site-shell.css" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
   <title>Frequently Asked Questions | Bank-Roll</title>
 </head>
 <body class="knowledge-document">
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="Bank-Roll home"><span class="site-mark" aria-hidden="true">BR</span>Bank-Roll</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html" aria-current="page">Learn</a></nav>
+    <a class="site-play-link" href="player.html">PLAY</a>
+    <label class="theme-control"><span>Theme</span><select data-theme-select aria-label="Colour theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <span class="theme-status" data-theme-status role="status"></span>
+    <details class="site-menu"><summary aria-label="Open main navigation">MENU</summary><nav aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html" aria-current="page">Learn · FAQ</a><a href="docs.html">Technical docs</a></nav></details>
+  </header>
   <div class="knowledge-shell">
-    <header class="research-public-header">
-      <a class="research-brand" href="index.html"><strong>Bank-Roll</strong><span>WINNING STREETS · QUESTIONS</span></a>
-      <nav aria-label="Main navigation">
-        <a href="index.html">Laboratory</a>
-        <a href="test-mode.html">Try BRI</a>
-        <a href="research.html">Research</a>
-        <a href="/docs">Technical docs</a>
-      </nav>
-    </header>
-
     <main>
       <header class="knowledge-heading">
         <p class="research-kicker">BANK-ROLL · BRI · EUROPEAN ROULETTE</p>
@@ -113,12 +114,13 @@
         <details data-searchable><summary>How can researchers reproduce experiments?</summary><p>The repository documents Node-based test and benchmark commands, deterministic seeds, scenario definitions and result files. Synthetic result JSON is retained in the development repository but is not published as public research evidence or served by the cPanel package.</p></details>
         <details data-searchable><summary>Can BRI create new research pages?</summary><p>Not currently. Dynamic research-page generation, evidence-linked publishing proposals and an editorial approval workflow are planned concepts, not available capabilities. This FAQ and technical guide are authored static pages.</p></details>
         <details data-searchable><summary>Why is evidence-protected publishing important?</summary><p>Many hypotheses and repeated comparisons can produce attractive patterns by chance. Public scientific or financial conclusions should cite eligible datasets, model versions, methods and independent evaluation; no automated publication pipeline is currently enabled.</p></details>
-        <details data-searchable><summary>Where can I learn more?</summary><p>Read the <a href="/docs">technical documentation</a>, use <a href="player.html">Player Mode</a> to keep local physical-table records, try <a href="test-mode.html">Test Mode</a> for disposable experiments, or return to the <a href="index.html">laboratory</a>.</p></details>
+        <details data-searchable><summary>Where can I learn more?</summary><p>Read the <a href="docs.html">technical documentation</a>, use <a href="player.html">Player Mode</a> to keep local physical-table records, try <a href="test-mode.html">Test Mode</a> for disposable experiments, or open the <a href="index.html">simulator</a>.</p></details>
       </section>
 
-      <footer class="research-public-footer">
-        <span>Bank-Roll · Facts, estimates and hypotheses are labelled separately.</span>
-        <a href="index.html">Return to the laboratory</a>
+      <footer class="site-footer">
+        <div class="site-footer-brand"><strong>Bank-Roll · Learn</strong><span>Facts, estimates and hypotheses are labelled separately.</span></div>
+        <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/">Home</a><a href="player.html">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Documentation</a></nav>
+        <div class="site-footer-meta"><span data-app-version>Version loading</span></div>
       </footer>
     </main>
   </div>

@@ -2,28 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script src="assets/js/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Try Bank-Roll Intelligence with temporary, manually entered or generated roulette outcomes. Test data is not real-table research and expires within 24 hours." />
   <title>Test Mode | Bank-Roll</title>
   <link rel="stylesheet" href="assets/css/bank-roll.css" />
+  <link rel="stylesheet" href="assets/css/site-shell.css" />
+  <link rel="stylesheet" href="assets/css/number-entry.css" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/test-entry-feedback.css" />
 </head>
 <body class="test-mode-document">
+  <header class="site-header">
+    <a class="site-brand" href="/" aria-label="Bank-Roll home"><span class="site-mark" aria-hidden="true">BR</span>Bank-Roll</a>
+    <nav class="site-nav" aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html" aria-current="page">Test</a><a href="research.html">Research</a><a href="faq.html">Learn</a></nav>
+    <a class="site-play-link" href="player.html">PLAY</a>
+    <label class="theme-control"><span>Theme</span><select data-theme-select aria-label="Colour theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <span class="theme-status" data-theme-status role="status"></span>
+    <details class="site-menu"><summary aria-label="Open main navigation">MENU</summary><nav aria-label="Main navigation"><a href="/">Home</a><a href="player.html" data-primary>Play</a><a href="index.html">Simulate</a><a href="test-mode.html" aria-current="page">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Technical docs</a></nav></details>
+  </header>
   <div class="test-mode-shell">
-    <header class="research-public-header">
-      <a class="research-brand" href="index.html">
-        <strong>Bank-Roll</strong>
-        <span>WINNING STREETS · TEST LAB</span>
-      </a>
-      <nav aria-label="Main navigation">
-        <a href="index.html">Laboratory</a>
-        <a href="player.html">Player Mode</a>
-        <a href="/faq">FAQ</a>
-        <a href="/docs">Technical docs</a>
-        <a href="research.html">Research &amp; method</a>
-        <span class="app-version" data-app-version>Version loading</span>
-      </nav>
-    </header>
-
     <main>
       <section class="test-mode-banner" aria-labelledby="testModeTitle">
         <div>
@@ -41,7 +39,7 @@
       <section class="test-setup" id="testSetup" aria-labelledby="testSetupTitle">
         <div>
           <h2 id="testSetupTitle">Start a temporary session</h2>
-          <p>Everything stays in this page's memory. Nothing is sent to the server or saved to table research.</p>
+          <p>Test outcomes stay in this page's memory. Nothing is sent to the server or saved to table research.</p>
         </div>
         <label for="testWageringMode">Decision mode</label>
         <select id="testWageringMode">
@@ -70,9 +68,14 @@
           <section class="test-input-panel" aria-labelledby="testEntryTitle">
             <div class="test-section-heading">
               <div><p class="research-kicker">MANUAL INPUT</p><h2 id="testEntryTitle">Enter a result</h2></div>
-              <strong id="testLastResult">No results</strong>
             </div>
-            <div class="test-number-pad" id="testNumberPad" aria-label="European roulette result keypad"></div>
+            <div class="test-recording-status" role="status" aria-live="polite" aria-atomic="true">
+              <strong id="testLastResult">No results</strong>
+              <span id="testEntryCount">0 observations</span>
+            </div>
+            <ol class="test-recent-results" id="testRecentResults" aria-label="Recent test results, newest first"></ol>
+            <p id="testInputStatus" role="status" aria-live="polite">Manual entries are temporary synthetic test data.</p>
+            <div class="test-number-pad number-entry-board" id="testNumberPad" aria-label="European roulette result keypad"></div>
             <div class="test-generator-row">
               <button class="btn" id="btnGenerateOne" type="button">Generate Random Spin</button>
               <label for="testBatchCount">Batch</label>
@@ -92,7 +95,6 @@
             </div>
             <div class="test-reset-row">
               <button class="btn" id="btnResetTest" type="button">Reset this test session</button>
-              <span id="testInputStatus" role="status" aria-live="polite">Manual entries are temporary synthetic test data.</span>
             </div>
           </section>
 
@@ -137,6 +139,11 @@
           </section>
         </div>
       </section>
+      <footer class="site-footer">
+        <div class="site-footer-brand"><strong>Bank-Roll · Test Mode</strong><span>Temporary test data is isolated and is not real-table research.</span></div>
+        <nav class="site-footer-nav" aria-label="Footer navigation"><a href="/">Home</a><a href="player.html">Play</a><a href="index.html">Simulate</a><a href="test-mode.html">Test</a><a href="research.html">Research</a><a href="faq.html">Learn · FAQ</a><a href="docs.html">Documentation</a></nav>
+        <div class="site-footer-meta"><span data-app-version>Version loading</span></div>
+      </footer>
     </main>
   </div>
   <script type="module" src="src/ui/sandbox-app.js"></script>

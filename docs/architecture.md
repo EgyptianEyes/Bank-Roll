@@ -1,9 +1,10 @@
 # Architecture
 
-Bank-Roll uses a browser-native ES-module frontend and an optional same-origin PHP API. Player Mode (`player.html`) is the Apache/cPanel directory entry point; `index.html` preserves the approved simulator and its board. Both work without a backend. Deploy the verified browser-only package rather than including unverified server features.
+Bank-Roll uses a browser-native ES-module frontend and an optional same-origin PHP API. The Apache/cPanel directory entry point is the mission-led home page (`home.html`); `player.html` is the local-first Player Mode and `index.html` preserves the simulator and its board. The browser experiences work without a backend. Deploy only the verified browser-only package rather than including unverified server features.
 
 ## Implemented boundaries
 
+- `assets/js/theme.js` runs synchronously before styles on all public pages, restoring the local `bank-roll-theme` preference or following the operating system. `assets/css/theme.css` centralises both palettes and semantic presentation tokens. Theme storage is separate from all table/research records; the canvas chart module redraws its existing data on a theme-change event.
 - `src/core/roulette.js`: European roulette outcomes, wheel order, colour, street and dozen mapping. `spinNumber()` maps a PRNG draw with `floor(draw * 37)` and does not use physical `WHEEL_ORDER` for outcome selection.
 - `src/core/random.js`: deterministic FNV-1a seed hashing and Mulberry32 random generation.
 - `src/core/mathematics.js`: European probabilities and integer minor-unit conversion.

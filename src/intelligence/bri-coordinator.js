@@ -78,6 +78,7 @@ export class BriCoordinator{
     limits = {},
     sustainabilityHorizon = 3,
     candidateCount = 3,
+    maximumStreetCount = 4,
     minimumModelEvaluations = 25,
     wageringMode = "evidence-gated",
     researchActionPolicy = "adaptive",
@@ -95,9 +96,16 @@ export class BriCoordinator{
     this.limits = {...limits};
     this.sustainabilityHorizon = sustainabilityHorizon;
     this.candidateCount = candidateCount;
+    if (!Number.isInteger(maximumStreetCount) || maximumStreetCount < 1 || maximumStreetCount > 12){
+      throw new RangeError("Maximum street count must be between one and twelve.");
+    }
+    this.maximumStreetCount = maximumStreetCount;
     this.minimumModelEvaluations = minimumModelEvaluations;
     if (!["evidence-gated", "strategy-research"].includes(wageringMode)) throw new RangeError("Unsupported BRI wagering mode.");
     if (!RESEARCH_ACTION_POLICIES.has(researchActionPolicy)) throw new RangeError("Unsupported BRI complete-path research policy.");
+    if (researchActionPolicy !== "adaptive" && wageringMode !== "strategy-research"){
+      throw new RangeError("Forced research action policies require synthetic strategy-research wagering mode.");
+    }
     if (!Number.isInteger(decisionHistoryLimit) || decisionHistoryLimit < 0) throw new RangeError("Decision history limit must be a non-negative integer.");
     this.wageringMode = wageringMode;
     this.researchActionPolicy = researchActionPolicy;
@@ -140,6 +148,9 @@ export class BriCoordinator{
       !Array.isArray(state.currentStreets) ||
       state.currentStreets.some((street) => !Number.isInteger(street) || street < 0 || street > 11)){
       throw new TypeError("Invalid BRI coordinator session state.");
+    }
+    if (state.currentStreets.length > this.maximumStreetCount){
+      throw new RangeError("Restored BRI position exceeds the configured maximum street count.");
     }
     const countKeys = ["continue", "switch", "spread", "stop", "observe"];
     if (countKeys.some((key) => !Number.isSafeInteger(snapshot.decisionCounts[key]) || snapshot.decisionCounts[key] < 0)){
@@ -228,6 +239,7 @@ export class BriCoordinator{
       probabilities,
       currentStreets: this.state.currentStreets,
       candidateStreets,
+      spreadWidth: this.maximumStreetCount,
       limits: this.limits,
       sustainabilityHorizon: this.sustainabilityHorizon,
       evidenceWeak: evidence.evidenceWeak,
@@ -261,9 +273,7 @@ export class BriCoordinator{
       };
       const approval = canPlaceWager(this.state.bankrollCents, wager, this.limits);
       if (!approval.allowed){
-        // The decision engine and accounting must agree; refuse rather than
-        // allow a decision to override the independent financial safeguard.
-        wager = null;
+        throw new Error(`BRI decision violates independent wager approval: ${approval.reason}.`);
       } else {
         this.state.bankrollCents -= wager.totalStakeCents;
         if (decision.action === "switch"){
